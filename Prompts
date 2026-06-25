@@ -1,0 +1,544 @@
+PROMPT: Matrimony user verification framework
+You are a team consisting of:
+
+* Principal Security Architect
+* Identity Verification Expert
+* Trust & Safety Lead
+* Fraud Prevention Specialist
+* Consumer Onboarding Expert
+* Matrimony Product Strategist
+* Senior React SaaS Architect
+* Privacy Engineer
+* UX Researcher
+* Compliance Consultant
+
+Context:
+
+I am building a Sharia-compliant Muslim Matrimony Platform using:
+
+Frontend:
+
+* React
+* TypeScript
+* Tailwind
+* React Query
+* React Hook Form
+
+Backend:
+
+* Node.js
+* PostgreSQL
+* Redis
+* S3-compatible storage
+
+The platform is NOT a dating app.
+
+The platform is designed for:
+
+* Marriage
+* Family involvement
+* Wali participation
+* Female privacy
+* Serious intent verification
+* Trust-based matching
+
+I do NOT want to depend on Government ID verification as the primary trust mechanism.
+
+My objective is to design a world-class verification and trust system that:
+
+* Prevents fake profiles
+* Prevents impersonation
+* Prevents romance scams
+* Prevents spam
+* Encourages serious marriage intent
+* Builds trust for women
+* Builds trust for families
+* Builds trust for wali/guardians
+* Maintains privacy
+* Minimizes onboarding friction
+
+---
+
+PART 1
+
+VERIFICATION FRAMEWORK
+
+Design a complete verification framework.
+
+Analyze and compare:
+
+1. Phone Verification
+2. Email Verification
+3. Selfie Verification
+4. Face Match
+5. Liveness Detection
+6. Video Verification
+7. Family Verification
+8. Wali Verification
+9. Community Reference Verification
+10. Education Verification
+11. Employment Verification
+12. Social Account Verification
+13. Behavioral Verification
+14. Payment Verification
+15. Manual Review
+16. Device Fingerprinting
+17. Risk Scoring
+18. AI Fraud Detection
+
+For each provide:
+
+* What it proves
+* Trust level
+* User friction
+* Privacy impact
+* Engineering complexity
+* Cost
+* Operational burden
+* Matrimony-specific value
+
+Provide implementation recommendations.
+
+---
+
+PART 2
+
+TRUST MODEL
+
+Design a Trust Score system from 0 to 100.
+
+Create weighted scoring.
+
+Examples:
+
+Phone Verified
++10
+
+Email Verified
++5
+
+Selfie Verified
++15
+
+Family Verified
++20
+
+Wali Verified
++20
+
+Profile Completion
++10
+
+Video Verified
++15
+
+Community Endorsement
++10
+
+No Reports
++5
+
+Account Age
++5
+
+Design:
+
+* Formula
+* Score ranges
+* Trust tiers
+* Badge system
+
+---
+
+PART 3
+
+TRUST TIERS
+
+Design trust levels:
+
+Tier 0
+Unverified
+
+Tier 1
+Basic Verified
+
+Tier 2
+Identity Verified
+
+Tier 3
+Trusted Member
+
+Tier 4
+Family Verified
+
+Tier 5
+Highly Trusted
+
+For each tier define:
+
+* Requirements
+* Permissions
+* Restrictions
+* Visibility benefits
+* Messaging limits
+* Photo access permissions
+
+---
+
+PART 4
+
+SERIOUSNESS VERIFICATION
+
+Design a separate system that measures marriage seriousness.
+
+Not identity.
+
+Examples:
+
+* Profile completeness
+* Family involvement
+* Proposal response rate
+* Time to respond
+* Questionnaire completion
+* Compatibility completion
+* Premium membership
+* Community references
+
+Create:
+
+Seriousness Score
+0–100
+
+Explain:
+
+* Formula
+* Calculation
+* Abuse prevention
+
+---
+
+PART 5
+
+FAMILY & WALI VERIFICATION
+
+Design a complete workflow.
+
+Female user registers.
+
+Questions:
+
+* Should wali be mandatory?
+* Optional?
+* Regional settings?
+
+Design:
+
+1. Add wali
+2. Verify wali
+3. Wali dashboard
+4. Wali permissions
+5. Wali notifications
+6. Wali approvals
+7. Photo release approvals
+8. Match progression approvals
+
+Create complete state diagrams.
+
+---
+
+PART 6
+
+RISK ENGINE
+
+Design a fraud detection engine.
+
+Detect:
+
+* Catfishing
+* Fake profiles
+* Duplicate accounts
+* Mass messaging
+* Romance scams
+* Harassment
+* Bot activity
+* Suspicious proposal patterns
+
+Create:
+
+Risk Score
+0–100
+
+Signals:
+
+* Device
+* IP
+* Behavior
+* Reports
+* Trust level
+
+Explain:
+
+* Scoring model
+* Thresholds
+* Escalation rules
+
+---
+
+PART 7
+
+REACT APPLICATION ARCHITECTURE
+
+Design frontend architecture.
+
+Include:
+
+Pages:
+
+* Verification Center
+* Trust Dashboard
+* Verification Status
+* Family Verification
+* Wali Verification
+* Trust Badge Center
+
+Components:
+
+* VerificationCard
+* TrustBadge
+* TrustScoreWidget
+* VerificationProgress
+* FamilyVerificationPanel
+* RiskStatusPanel
+
+Create:
+
+Folder structure
+
+State management strategy
+
+API design
+
+React Query architecture
+
+Permission guards
+
+Feature flags
+
+---
+
+PART 8
+
+DATABASE DESIGN
+
+Create PostgreSQL schema.
+
+Tables:
+
+users
+
+verifications
+
+trust_scores
+
+risk_scores
+
+family_members
+
+wali_accounts
+
+community_references
+
+verification_events
+
+trust_history
+
+risk_events
+
+verification_documents
+
+audit_logs
+
+Include:
+
+* Fields
+* Relationships
+* Indexes
+* Constraints
+
+---
+
+PART 9
+
+API DESIGN
+
+Create REST APIs.
+
+Examples:
+
+POST /verify/phone
+
+POST /verify/email
+
+POST /verify/selfie
+
+POST /verify/video
+
+POST /family/add
+
+POST /wali/add
+
+POST /trust/recalculate
+
+GET /trust/profile
+
+GET /verification/status
+
+Define:
+
+* Request schema
+* Response schema
+* Errors
+
+---
+
+PART 10
+
+UX DESIGN
+
+Design verification experience.
+
+Goals:
+
+* High trust
+* Low friction
+* Respectful language
+* Female-friendly
+* Parent-friendly
+
+Avoid:
+
+"Verify your identity"
+
+Prefer:
+
+"Increase trust in your profile"
+
+Create:
+
+* Microcopy
+* Progress states
+* Success states
+* Failure states
+* Appeals process
+
+---
+
+PART 11
+
+PRIVACY & DATA RETENTION
+
+Design privacy architecture.
+
+For every verification method explain:
+
+* What data is stored
+* What data is deleted
+* Retention period
+* Encryption strategy
+* Consent requirements
+
+Apply:
+
+* Data minimization
+* Purpose limitation
+* Privacy by design
+
+---
+
+PART 12
+
+OPERATIONAL WORKFLOW
+
+Design moderation dashboard.
+
+Create:
+
+Queues:
+
+* Verification review
+* Family review
+* Wali review
+* Fraud review
+* Appeals review
+
+Define:
+
+* SLA targets
+* Escalation paths
+* Audit requirements
+
+---
+
+PART 13
+
+PRODUCT STRATEGY
+
+Recommend the ideal verification stack for:
+
+1. New users
+2. Female users
+3. Male users
+4. Family-managed profiles
+5. Premium members
+6. High-risk users
+
+Prioritize:
+
+* Trust
+* Marriage success
+* Female safety
+* Privacy
+* Family participation
+* Low onboarding abandonment
+
+---
+
+PART 14
+
+FINAL DELIVERABLE
+
+Produce:
+
+1. Verification Architecture Diagram
+2. Trust Score System
+3. Seriousness Score System
+4. Risk Score System
+5. Family Verification Workflow
+6. Wali Verification Workflow
+7. React Frontend Architecture
+8. PostgreSQL Schema
+9. REST API Design
+10. Security Model
+11. Privacy Model
+12. Fraud Prevention Model
+13. Moderation Dashboard
+14. MVP Version
+15. Phase 2 Version
+16. Phase 3 Enterprise Version
+
+Be extremely critical.
+
+Challenge assumptions.
+
+Recommend what should NOT be built.
+
+Optimize for:
+
+* Real marriages
+* Trust
+* Privacy
+* Female safety
+* Family involvement
+* Scalability
+* Operational simplicity
+* Long-term sustainability
