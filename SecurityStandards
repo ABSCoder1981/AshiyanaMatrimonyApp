@@ -1,0 +1,23 @@
+1. ARCHITECTURE AUDIT — Review against OWASP Top 10 + OWASP API Security Top 10
+2. AUTH — httpOnly cookies, JWT rotation, refresh token rotation, 
+   session kill on deactivation, concurrent session limits, MFA ready
+3. AUTHORIZATION — RLS on every Supabase table, IDOR checks on 
+   every endpoint, no horizontal privilege escalation possible, 
+   mass assignment protection
+4. INPUT SECURITY — sanitize + validate all inputs with zod, 
+   parameterized queries only, no raw SQL
+5. RATE LIMITING — on auth, on all API endpoints, on bulk actions
+6. SECURITY HEADERS — CSP, HSTS, X-Frame-Options, 
+   X-Content-Type-Options, Referrer-Policy
+7. DATA PROTECTION — encrypt sensitive PII fields, 
+   mask data by role, never expose raw DB errors
+8. INFRASTRUCTURE — no secrets in code, HTTPS only, 
+   CORS locked to exact domain
+9. MONITORING — log all auth events, role changes, 
+   data exports with timestamps and IPs
+10. DEPENDENCY SAFETY — flag any package with known CVEs
+
+After building, generate:
+- A security checklist with PASS/FAIL for each item
+- A list of anything that needs manual review
+- Recommended security headers config
