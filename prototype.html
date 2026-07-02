@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nikah Platform — Visual Prototype</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+:root{
+  --green:#1a6e3c; --green-light:#f0f7f0; --green-border:#e8f0e9;
+  --compat-green:#15803d; --compat-teal:#0d9488; --compat-amber:#d97706;
+  --text-primary:#111827; --text-secondary:#6b7280;
+  --warning-amber:#f59e0b; --error-red:#dc2626; --white:#ffffff;
+  --grey-track:#e5e7eb;
+  --font:'Segoe UI', system-ui, sans-serif;
+}
+body{
+  font-family:var(--font); background:#dfe7e1; color:var(--text-primary);
+  min-height:100vh; padding:24px 12px 60px;
+}
+
+/* ── Prototype navigator (outside the frame) ── */
+.proto-nav{
+  max-width:980px; margin:0 auto 20px; background:#fff; border:1.5px solid var(--green-border);
+  border-radius:12px; padding:14px 16px; box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+.proto-nav-title{ font-weight:700; font-size:14px; margin-bottom:8px; }
+.proto-hint{ font-weight:400; color:var(--text-secondary); font-size:12px; }
+.proto-nav-row{ display:flex; gap:8px; margin-bottom:10px; }
+.device-toggle{
+  border:1.5px solid var(--green-border); background:#fff; color:var(--text-primary);
+  padding:6px 14px; border-radius:99px; font-size:13px; cursor:pointer; font-family:var(--font);
+}
+.device-toggle.active{ background:var(--green); color:#fff; border-color:var(--green); }
+.proto-group{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+.proto-group-label{ font-size:12px; color:var(--text-secondary); font-weight:600; min-width:80px; }
+.proto-group button{
+  border:1px solid var(--green-border); background:var(--green-light); color:var(--text-primary);
+  padding:5px 10px; border-radius:8px; font-size:12px; cursor:pointer; font-family:var(--font);
+}
+.proto-group button:hover{ background:var(--green); color:#fff; }
+
+/* ── Device frame ── */
+.device-frame{
+  max-width:420px; margin:0 auto; background:#fff; border-radius:28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.18); overflow:hidden; border:8px solid #1f2937;
+  height:860px; display:flex; flex-direction:column; position:relative; transition:max-width .25s;
+}
+.device-frame.web{ max-width:760px; border-radius:14px; border-width:2px; border-color:var(--green-border); }
+
+.screen{ display:none; flex-direction:column; height:100%; }
+.screen.active{ display:flex; }
+
+.scroll-area{ flex:1; overflow-y:auto; }
+.pad{ padding:18px; }
+.scroll-area.pad{ padding:18px; }
+
+/* ── Welcome ── */
+.welcome-screen{
+  height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:var(--green-light); text-align:center; padding:30px;
+}
+.welcome-icon{ font-size:3rem; margin-bottom:18px; }
+.welcome-screen h1{ font-size:20px; font-weight:700; color:var(--green); margin-bottom:4px; }
+.welcome-screen h2{ font-size:18px; font-weight:600; margin-bottom:14px; }
+.welcome-screen p{ font-size:14px; color:var(--text-secondary); max-width:260px; }
+
+/* ── Typography ── */
+h1{ font-size:20px; font-weight:700; }
+h2{ font-size:16px; font-weight:600; margin-bottom:10px; }
+p{ font-size:14px; line-height:1.5; margin-bottom:8px; }
+.body-sm{ font-size:13px; color:var(--text-secondary); margin-bottom:4px; }
+.caption{ font-size:12px; color:var(--text-secondary); }
+.center{ text-align:center; }
+.req{ color:var(--error-red); }
+hr{ border:none; border-top:1px solid var(--green-border); margin:16px 0; }
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:var(--font);
+  padding:11px 18px; border:none; margin-bottom:8px;
+}
+.btn-full{ width:100%; }
+.btn-primary{ background:var(--green); color:#fff; }
+.btn-outline{ background:#fff; color:var(--green); border:1.5px solid var(--green); }
+.btn-ghost{ background:transparent; color:var(--text-secondary); text-decoration:underline; font-weight:400; }
+.btn-danger{ background:transparent; color:var(--error-red); border:1.5px solid var(--error-red); }
+.btn-sm{ font-size:13px; padding:8px 14px; }
+.btn-xs{ font-size:12px; padding:6px 10px; }
+.link-btn{
+  background:none; border:none; color:var(--green); font-weight:600; font-size:13px;
+  cursor:pointer; font-family:var(--font); text-decoration:none;
+}
+.back-link{
+  background:none; border:none; color:var(--text-secondary); font-size:13px; cursor:pointer;
+  font-family:var(--font); margin-bottom:10px;
+}
+
+/* ── Fields ── */
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:13px; font-weight:600; margin-bottom:5px; }
+input[type="text"], select, textarea{
+  width:100%; padding:9px 12px; border:1.5px solid var(--grey-track); border-radius:8px;
+  font-size:14px; font-family:var(--font); color:var(--text-primary);
+}
+input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--green); }
+textarea{ min-height:70px; resize:vertical; }
+.or-divider{ text-align:center; color:var(--text-secondary); font-size:12px; margin:8px 0; }
+
+/* ── Pills ── */
+.pill-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.pill-row.wrap{ flex-wrap:wrap; }
+.pill{
+  border:1.5px solid var(--grey-track); background:#fff; color:var(--text-primary);
+  padding:6px 14px; border-radius:99px; font-size:13px; cursor:pointer; font-family:var(--font);
+}
+.pill-on{ background:var(--green); color:#fff; border-color:var(--green); }
+
+/* ── Check list / story ── */
+.check-list{ list-style:none; margin:8px 0; }
+.check-list li{ font-size:13px; margin-bottom:4px; }
+.quote{ font-style:italic; color:var(--text-secondary); }
+.story{ font-size:13px; font-style:italic; color:var(--text-secondary); border-left:3px solid var(--green-border); padding-left:10px; margin:8px 0; }
+.story span{ font-style:normal; font-weight:600; color:var(--text-primary); }
+.center-logo{ text-align:center; font-size:2.2rem; margin-bottom:6px; }
+
+/* ── OTP ── */
+.otp-row{ display:flex; gap:8px; justify-content:center; margin:18px 0; }
+.otp-row input{
+  width:38px; height:46px; text-align:center; font-size:18px; font-weight:700;
+  border:1.5px solid var(--grey-track); border-radius:8px;
+}
+
+/* ── Selfie ── */
+.camera-preview{
+  background:#111827; border-radius:12px; height:220px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; color:#fff; margin:14px 0; gap:10px;
+}
+.camera-circle{ font-size:3rem; border:2px dashed #fff; border-radius:50%; width:90px; height:90px; display:flex; align-items:center; justify-content:center; }
+.camera-preview .caption{ color:#d1d5db; }
+
+/* ── Progress ── */
+.progress-track{ height:8px; background:var(--grey-track); border-radius:99px; overflow:hidden; margin:4px 0; }
+.progress-fill{ height:100%; background:var(--green); border-radius:99px; }
+
+/* ── Topbar ── */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; padding:14px 16px;
+  background:#fff; border-bottom:1px solid var(--green-border); font-weight:600; font-size:14px; flex-shrink:0;
+}
+.topbar-logo{ font-weight:700; }
+.topbar-icons{ display:flex; align-items:center; gap:10px; font-size:16px; }
+.icon-dot{ position:relative; }
+.icon-dot::after{ content:''; position:absolute; top:-2px; right:-2px; width:7px; height:7px; background:var(--green); border-radius:50%; }
+.back-arrow{ background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-primary); }
+.online-dot{ font-size:11px; color:var(--text-secondary); font-weight:400; }
+
+/* ── Cards ── */
+.card{
+  background:var(--green-light); border:1px solid var(--green-border); border-radius:12px;
+  padding:14px; margin:0 14px 14px; box-shadow:0 1px 4px rgba(0,0,0,.04);
+}
+.card-label{ font-weight:700; font-size:13px; margin-bottom:6px; }
+.reminder-card{ background:var(--green-light); }
+.verse{ font-style:italic; font-size:13px; margin-bottom:4px; }
+.verse-ref{ font-weight:700; color:var(--green); font-size:12px; margin-bottom:8px; }
+
+.profile-card .profile-row{ display:flex; align-items:center; gap:10px; }
+.avatar{ font-size:1.8rem; }
+.tags-row{ display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+.tag{ font-size:11px; padding:3px 8px; border-radius:99px; }
+.tag-ok{ background:#dcfce7; color:var(--compat-green); }
+.tag-warn{ background:#fef3c7; color:var(--warning-amber); }
+.tag-new{ background:#dbeafe; color:#1d4ed8; }
+.warn-line{ font-size:12px; color:var(--warning-amber); margin:6px 0; }
+
+.badge{ display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; margin:2px 4px 2px 0; }
+.badge-green{ background:#dcfce7; color:var(--compat-green); }
+.badge-compat-green{ background:#dcfce7; color:var(--compat-green); }
+.badge-compat-teal{ background:#ccfbf1; color:var(--compat-teal); }
+.badge-amber{ background:#fef3c7; color:var(--compat-amber); }
+
+.activity-row{
+  display:flex; justify-content:space-around; padding:14px; margin:0 14px 14px;
+  background:#fff; border:1px solid var(--green-border); border-radius:12px; text-align:center; font-size:13px;
+}
+.activity-row div{ display:flex; flex-direction:column; gap:2px; }
+
+.journey-track{ display:flex; gap:4px; font-size:14px; margin:6px 0; }
+.journey-labels{ display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-bottom:6px; }
+.tip{ font-size:12px; color:var(--text-secondary); background:#fff; padding:8px; border-radius:8px; }
+
+.section-head{ display:flex; justify-content:space-between; align-items:center; padding:0 14px; margin-bottom:8px; font-weight:700; font-size:13px; }
+.match-row{ display:flex; gap:10px; padding:0 14px 14px; overflow-x:auto; }
+.match-card{
+  background:#fff; border:1px solid var(--green-border); border-radius:12px; padding:10px;
+  min-width:120px; display:flex; flex-direction:column; gap:4px; flex-shrink:0;
+}
+.match-card.small{ min-width:90px; align-items:center; text-align:center; }
+.match-photo{ font-size:2rem; text-align:center; }
+.card-actions{ display:flex; gap:6px; margin-top:6px; }
+
+/* ── Search ── */
+.search-controls{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; }
+.result-card .result-head{ display:flex; justify-content:space-between; margin-bottom:4px; }
+.why-line{ font-size:12px; font-style:italic; color:var(--text-secondary); }
+
+/* ── Profile view ── */
+.photo-hidden-box{
+  background:#f3f4f6; border:1px dashed var(--grey-track); border-radius:12px; text-align:center;
+  padding:24px; font-size:13px; color:var(--text-secondary); margin-bottom:12px;
+}
+.kv-table{ width:100%; font-size:13px; border-collapse:collapse; }
+.kv-table td{ padding:5px 0; border-bottom:1px solid var(--green-border); }
+.kv-table td:first-child{ color:var(--text-secondary); width:40%; }
+.locked-card{ background:#fff7ed; border-color:#fde68a; }
+.sticky-footer{ padding:14px; border-top:1px solid var(--green-border); background:#fff; }
+
+/* ── Tabs ── */
+.tabs{ display:flex; border-bottom:1px solid var(--green-border); }
+.tab{
+  flex:1; background:none; border:none; padding:12px; font-size:13px; font-weight:600;
+  color:var(--text-secondary); cursor:pointer; font-family:var(--font); border-bottom:2px solid transparent;
+}
+.tab.active{ color:var(--green); border-color:var(--green); }
+.tab-panel{ display:none; }
+.tab-panel.active{ display:block; }
+
+/* ── Chat list ── */
+.chat-row{ display:flex; gap:10px; align-items:center; padding:12px 0; border-bottom:1px solid var(--green-border); cursor:pointer; }
+.chat-row-body{ flex:1; }
+.chat-row-meta{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.dot-badge{ background:var(--green); color:#fff; font-size:11px; padding:2px 7px; border-radius:99px; }
+
+/* ── Chat thread ── */
+.chat-banner{
+  background:var(--green-light); font-size:12px; padding:8px 14px; display:flex;
+  justify-content:space-between; align-items:center; color:var(--text-secondary);
+}
+.dismiss-x{ background:none; border:none; cursor:pointer; color:var(--text-secondary); }
+.chat-area{ display:flex; flex-direction:column; gap:8px; }
+.bubble{ max-width:75%; padding:9px 12px; border-radius:12px; font-size:13px; position:relative; }
+.bubble-time{ display:block; font-size:10px; color:var(--text-secondary); margin-top:3px; text-align:right; }
+.bubble-out{ background:var(--green); color:#fff; align-self:flex-end; border-bottom-right-radius:3px; }
+.bubble-out .bubble-time{ color:#d1fae5; }
+.bubble-in{ background:#f3f4f6; color:var(--text-primary); align-self:flex-start; border-bottom-left-radius:3px; }
+.chips-row{ display:flex; gap:6px; overflow-x:auto; padding:8px 14px; }
+.chip{
+  border:1.5px solid var(--green-border); background:var(--green-light); color:var(--green);
+  padding:6px 12px; border-radius:99px; font-size:12px; white-space:nowrap; cursor:pointer; font-family:var(--font);
+}
+.chat-input-row{ display:flex; gap:8px; padding:10px 14px; border-top:1px solid var(--green-border); }
+.chat-input-row input{ flex:1; }
+
+/* ── Bottom nav ── */
+.bottom-nav{
+  display:flex; justify-content:space-around; align-items:center; padding:10px 0;
+  border-top:1px solid var(--green-border); background:#fff; flex-shrink:0;
+}
+.bottom-nav button{
+  background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-secondary);
+  position:relative; padding:4px 10px;
+}
+.bottom-nav button.active{ color:var(--green); }
+.bottom-nav button.has-dot::after{
+  content:''; position:absolute; top:2px; right:6px; width:7px; height:7px; background:var(--green); border-radius:50%;
+}
+
+/* ── Settings ── */
+.settings-list{ margin-bottom:14px; }
+.settings-row{
+  display:block; width:100%; text-align:left; background:#fff; border:1px solid var(--green-border);
+  border-radius:8px; padding:11px 14px; font-size:13px; margin-bottom:6px; cursor:pointer; font-family:var(--font);
+  color:var(--text-primary);
+}
+
+/* ── Notifications ── */
+.notif-row{ display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--green-border); }
+.notif-icon{ font-size:1.3rem; }
+
+/* ── Premium ── */
+.plan-card{
+  background:#fff; border:1.5px solid var(--green-border); border-radius:14px; padding:16px;
+  margin-bottom:14px;
+}
+.plan-popular{ border-color:var(--green); box-shadow:0 0 0 2px var(--green-light); }
+.plan-name{ font-weight:700; font-size:14px; margin-bottom:4px; }
+.plan-price{ font-size:18px; font-weight:700; color:var(--green); margin-bottom:10px; }
+.plan-features{ list-style:none; font-size:13px; margin-bottom:12px; }
+.plan-features li{ margin-bottom:4px; }
+.plan-features li.off{ color:var(--text-secondary); }
+
+/* ── Admin ── */
+.admin-topbar{ background:var(--green); color:#fff; }
+.admin-topbar .back-arrow, .admin-topbar .link-btn{ color:#fff; }
+.admin-stats{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.stat{
+  background:#fff; border:1px solid var(--green-border); border-radius:10px; padding:12px;
+  display:flex; flex-direction:column; gap:2px;
+}
+.stat strong{ font-size:18px; }
+.stat.warn strong{ color:var(--error-red); }
+
+@media (max-width:460px){
+  body{ padding:12px 6px 40px; }
+  .proto-nav-row{ flex-wrap:wrap; }
+  .device-frame{ border-radius:0; border-width:0; height:100vh; max-width:100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ PROTOTYPE NAVIGATOR (outside the app frame — for browsing screens only) ══ -->
+<div class="proto-nav">
+  <div class="proto-nav-title">🧭 Prototype Navigator <span class="proto-hint">— click any screen to jump · not real functionality</span></div>
+  <div class="proto-nav-row">
+    <button class="device-toggle active" data-device="app" id="dev-app">📱 App view</button>
+    <button class="device-toggle" data-device="web" id="dev-web">💻 Website view</button>
+  </div>
+  <div class="proto-group">
+    <span class="proto-group-label">Onboarding</span>
+    <button data-screen="welcome">Welcome</button>
+    <button data-screen="reg-landing">Landing</button>
+    <button data-screen="reg-form">Register</button>
+    <button data-screen="reg-otp">OTP</button>
+    <button data-screen="reg-selfie">Selfie</button>
+    <button data-screen="reg-nudge">Nudge</button>
+  </div>
+  <div class="proto-group">
+    <span class="proto-group-label">Quick-Match</span>
+    <button data-screen="qm-question">Sample question</button>
+    <button data-screen="qm-loading">Finding matches</button>
+    <button data-screen="qm-results">Suggested results</button>
+    <button data-screen="qm-empty">Few results state</button>
+  </div>
+  <div class="proto-group">
+    <span class="proto-group-label">Core app</span>
+    <button data-screen="home">Home</button>
+    <button data-screen="search">Search</button>
+    <button data-screen="filters">Filters</button>
+    <button data-screen="profile-view">Profile view</button>
+    <button data-screen="interests">Interests</button>
+    <button data-screen="chat-list">Chat list</button>
+    <button data-screen="chat-thread">Chat thread</button>
+    <button data-screen="islamic">Islamic</button>
+    <button data-screen="settings">Settings</button>
+    <button data-screen="notifications">Notifications</button>
+    <button data-screen="premium">Premium</button>
+  </div>
+  <div class="proto-group">
+    <span class="proto-group-label">Admin</span>
+    <button data-screen="admin-dashboard">Dashboard</button>
+    <button data-screen="admin-content">Content manager</button>
+    <button data-screen="admin-add-content">Add content</button>
+  </div>
+</div>
+
+<!-- ══ DEVICE FRAME ══ -->
+<div class="device-frame" id="device-frame">
+
+  <!-- 1. WELCOME -->
+  <section class="screen active" id="screen-welcome">
+    <div class="welcome-screen">
+      <div class="welcome-icon">☪️</div>
+      <h1>Bismillah.</h1>
+      <h2>Welcome to<br/>Nikah Platform</h2>
+      <p>May Allah make this journey easy and blessed for you.</p>
+    </div>
+  </section>
+
+  <!-- 2. REGISTRATION — LANDING -->
+  <section class="screen" id="screen-reg-landing">
+    <div class="pad">
+      <div class="center-logo">☪️</div>
+      <h1 class="center">Nikah Platform</h1>
+      <p class="quote center">"Your Nikah begins with sincerity"</p>
+      <button class="btn btn-primary btn-full" data-go="reg-form">Register as Bride</button>
+      <button class="btn btn-primary btn-full" data-go="reg-form">Register as Groom</button>
+      <button class="btn btn-outline btn-full" data-go="reg-form">Register as Wali (on someone's behalf)</button>
+      <hr/>
+      <p class="caption center">Trusted by families across India</p>
+      <ul class="check-list">
+        <li>✅ Verified profiles</li>
+        <li>✅ Privacy first</li>
+        <li>✅ Islamic guidance</li>
+      </ul>
+      <hr/>
+      <p class="caption center">Success stories</p>
+      <blockquote class="story">"Alhamdulillah we found each other through this platform"<br/><span>— Anonymous couple, Lucknow</span></blockquote>
+      <button class="btn btn-ghost btn-full">Watch how it works →</button>
+    </div>
+  </section>
+
+  <!-- 3. REGISTRATION — QUICK FORM -->
+  <section class="screen" id="screen-reg-form">
+    <div class="pad">
+      <button class="back-link" data-go="reg-landing">← Back</button>
+      <h2>Create your account</h2>
+      <div class="field">
+        <label>Register as <span class="req">*</span></label>
+        <div class="pill-row pill-row-single" id="registeras-pills"><button class="pill pill-on">Bride</button><button class="pill">Groom</button><button class="pill">Wali</button></div>
+      </div>
+      <div class="field"><label>Full name <span class="req">*</span></label><input type="text" placeholder="e.g. Ahmed Khan" /></div>
+      <div class="field"><label>Phone number <span class="req">*</span></label><input type="text" placeholder="+91 98765 43210" /></div>
+      <div class="or-divider">OR</div>
+      <div class="field"><label>Email address</label><input type="text" placeholder="your@email.com" /></div>
+      <div class="field">
+        <label>Gender <span class="req">*</span></label>
+        <div class="pill-row"><button class="pill">Male</button><button class="pill">Female</button></div>
+      </div>
+      <div class="card hidden" id="reg-form-wali-details" style="margin:0 0 14px">
+        <div class="card-label">Wali details <span class="caption">— shown only if "Register as: Wali" is selected</span></div>
+        <div class="field"><label>Wali's name</label><input type="text" placeholder="e.g. Mohammed Ali Khan" /></div>
+        <div class="field"><label>Wali's phone number</label><input type="text" placeholder="+91 98765 43210" /></div>
+        <div class="field"><label>Relationship to the candidate</label><div class="pill-row"><button class="pill pill-on">Father</button><button class="pill">Brother</button><button class="pill">Uncle</button><button class="pill">Other</button></div></div>
+      </div>
+      <button class="btn btn-primary btn-full" data-go="reg-otp">Create account →</button>
+      <p class="caption center">By registering you agree to our Islamic Principles and Privacy Policy</p>
+    </div>
+  </section>
+
+  <!-- 4. OTP -->
+  <section class="screen" id="screen-reg-otp">
+    <div class="pad">
+      <button class="back-link" data-go="reg-form">← Back</button>
+      <h2>Verify your number</h2>
+      <p class="body-sm">We sent a 6-digit code to +91 98765 43210</p>
+      <div class="otp-row">
+        <input maxlength="1" value="4"/><input maxlength="1" value="2"/><input maxlength="1" value="1"/>
+        <input maxlength="1" value="8"/><input maxlength="1" value="0"/><input maxlength="1" value="3"/>
+      </div>
+      <p class="caption center">Resend code in 45s</p>
+      <button class="btn btn-primary btn-full" data-go="reg-selfie">Verify →</button>
+    </div>
+  </section>
+
+  <!-- 5. SELFIE -->
+  <section class="screen" id="screen-reg-selfie">
+    <div class="pad">
+      <h2>One quick selfie</h2>
+      <p class="body-sm">This helps us keep the platform safe and free from fake profiles.</p>
+      <div class="camera-preview">
+        <div class="camera-circle">○</div>
+        <p class="caption">Position your face in the circle</p>
+      </div>
+      <button class="btn btn-primary btn-full" data-go="reg-nudge">Take selfie</button>
+      <p class="caption center">Your selfie is used only for verification. It is never shown publicly.</p>
+    </div>
+  </section>
+
+  <!-- 6. PROFILE COMPLETION NUDGE -->
+  <section class="screen" id="screen-reg-nudge">
+    <div class="pad">
+      <h2>Bismillah Ahmed! 🌙</h2>
+      <p>Your account is ready.</p>
+      <p class="body-sm">Complete your profile to get better matches</p>
+      <div class="progress-track"><div class="progress-fill" style="width:5%"></div></div>
+      <p class="caption">5%</p>
+      <p class="body-sm" style="margin-top:14px">When you complete your profile you will:</p>
+      <ul class="check-list">
+        <li>✅ Appear in search</li>
+        <li>✅ Receive interests</li>
+        <li>✅ Get accurate matches</li>
+        <li>✅ Show families you are serious</li>
+      </ul>
+      <button class="btn btn-primary btn-full" data-go="home">Complete my profile</button>
+      <button class="btn btn-ghost btn-full" data-go="home">Skip for now</button>
+      <button class="btn btn-outline btn-full" data-go="qm-question" style="margin-top:6px">Try the Quick-Match Wizard →</button>
+    </div>
+  </section>
+
+  <!-- 6B. QUICK-MATCH WIZARD — sample question screen -->
+  <section class="screen" id="screen-qm-question">
+    <div class="pad" style="display:flex;flex-direction:column;height:100%">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+        <button class="back-arrow" data-go="reg-nudge">←</button>
+        <div style="flex:1;display:flex;justify-content:center;gap:6px">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--green-m)"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--green-m)"></span>
+          <span style="width:20px;height:8px;border-radius:4px;background:var(--green)"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--grey-track)"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--grey-track)"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--grey-track)"></span>
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--grey-track)"></span>
+        </div>
+        <span style="width:1.2rem"></span>
+      </div>
+      <h2>Which sect matters to you?</h2>
+      <div class="pill-row" style="margin-top:10px">
+        <button class="pill pill-on">No preference</button><button class="pill">Sunni</button><button class="pill">Shia</button><button class="pill">Just Muslim</button>
+      </div>
+      <button class="link-btn" style="margin-top:18px;text-align:left">Skip — not sure yet</button>
+      <div style="margin-top:auto;padding-top:18px">
+        <button class="btn btn-primary btn-full" data-go="qm-loading">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6C. QUICK-MATCH WIZARD — finding matches -->
+  <section class="screen" id="screen-qm-loading">
+    <div class="pad" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center">
+      <div style="font-size:3rem;margin-bottom:16px">☪️</div>
+      <h2 style="color:var(--green)">Bismillah — finding your matches...</h2>
+      <div class="progress-track" style="max-width:220px;margin-top:18px"><div class="progress-fill" style="width:70%"></div></div>
+      <button class="btn btn-outline" style="margin-top:30px" data-go="qm-results">(demo: continue →)</button>
+    </div>
+  </section>
+
+  <!-- 6D. QUICK-MATCH WIZARD — suggested results -->
+  <section class="screen" id="screen-qm-results">
+    <div class="topbar"><button class="back-arrow" data-go="qm-question">←</button><span>Suggested for you</span></div>
+    <div class="scroll-area pad">
+      <p class="caption" style="margin-bottom:14px">Based on your quick answers — refine anytime by completing your full profile.</p>
+      <div class="card result-card">
+        <div class="result-head"><strong>Aisha M.</strong> <span class="caption">24 · Delhi</span></div>
+        <span class="badge badge-compat-teal">🔵 Good match</span>
+        <p class="body-sm">Hanafi · Masters · Hijab</p>
+      </div>
+      <div class="card result-card">
+        <div class="result-head"><strong>Sara K.</strong> <span class="caption">26 · Lucknow</span></div>
+        <span class="badge badge-compat-teal">🔵 Good match</span>
+        <p class="body-sm">Hanafi · Bachelor · Hijab</p>
+      </div>
+      <div class="card result-card">
+        <div class="result-head"><strong>Zara A.</strong> <span class="caption">23 · Mumbai</span></div>
+        <span class="badge badge-compat-teal">🔵 Good match</span>
+        <p class="body-sm">Shafi'i · Bachelor · Niqab</p>
+      </div>
+      <button class="btn btn-primary btn-full" data-go="home" style="margin-top:10px">Complete my full profile →</button>
+      <button class="btn btn-outline btn-full" data-go="home">Skip — just browse for now</button>
+    </div>
+  </section>
+
+  <!-- 6E. QUICK-MATCH WIZARD — few results state -->
+  <section class="screen" id="screen-qm-empty">
+    <div class="topbar"><button class="back-arrow" data-go="qm-results">←</button><span>Suggested for you</span></div>
+    <div class="pad" style="text-align:center;padding-top:60px">
+      <p class="body-sm">We're still growing in your area. Complete your profile to widen your search and get notified as new members join.</p>
+      <button class="btn btn-primary btn-full" data-go="home" style="margin-top:20px">Complete my full profile →</button>
+    </div>
+  </section>
+
+  <!-- 7. HOME -->
+  <section class="screen" id="screen-home">
+    <div class="topbar">
+      <span class="topbar-logo">☪️ Nikah Platform</span>
+      <span class="topbar-icons"><span class="icon-dot">🔔</span> 👤</span>
+    </div>
+    <div class="scroll-area">
+      <div class="card reminder-card">
+        <div class="card-label">📖 Daily Islamic Reminder</div>
+        <p class="verse">"And of His signs is that He created for you mates that you may find tranquillity in them"</p>
+        <p class="verse-ref">— Qur'an 30:21</p>
+        <button class="btn btn-outline btn-sm">📤 Share on WhatsApp</button>
+      </div>
+
+      <div class="card profile-card">
+        <div class="profile-row"><span class="avatar">👤</span><div><strong>Ahmed K.</strong> · Lucknow<br/><span class="badge badge-green">✅ Trusted Verified</span></div></div>
+        <p class="body-sm" style="margin-top:8px">Profile — 62%</p>
+        <div class="progress-track"><div class="progress-fill" style="width:62%"></div></div>
+        <div class="tags-row">
+          <span class="tag tag-ok">✅ Personal</span><span class="tag tag-ok">✅ Religious</span>
+          <span class="tag tag-warn">⚠️ About me</span><span class="tag tag-warn">⚠️ Hobbies</span>
+        </div>
+        <p class="warn-line">⚠️ Hidden from search</p>
+        <button class="btn btn-primary btn-full btn-sm">Complete my profile</button>
+      </div>
+
+      <div class="activity-row">
+        <div><span>👁️</span><strong>12</strong><span class="caption">Views</span></div>
+        <div><span>💌</span><strong>3</strong><span class="caption">Int</span></div>
+        <div><span>✉️</span><strong>2</strong><span class="caption">Msg</span></div>
+        <div><span>🔖</span><strong>5</strong><span class="caption">Saved</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Your Nikah Journey</div>
+        <div class="journey-track">
+          <span class="jstop done">✅</span><span class="jstop done">✅</span><span class="jstop current">🔵</span>
+          <span class="jstop">⚪</span><span class="jstop">⚪</span><span class="jstop">⚪</span>
+        </div>
+        <div class="journey-labels"><span>Profile</span><span>Search</span><span>Here</span></div>
+        <p class="tip">💡 "Read profiles carefully before sending interest"</p>
+      </div>
+
+      <div class="section-head">Suggested for you <button class="link-btn" data-go="search">See all →</button></div>
+      <div class="match-row">
+        <div class="match-card">
+          <div class="match-photo">🧕</div>
+          <strong>Aisha M.</strong><span class="caption">24 · Delhi</span>
+          <span class="badge badge-compat-green">🟢 92%</span>
+          <span class="caption">Hanafi · Masters</span>
+          <span class="tag tag-new">🆕 New</span>
+          <div class="card-actions"><button class="btn btn-primary btn-xs" data-go="profile-view">Interest</button><button class="btn btn-outline btn-xs">🔖</button></div>
+        </div>
+        <div class="match-card">
+          <div class="match-photo">🧕</div>
+          <strong>Sara K.</strong><span class="caption">26 · Lucknow</span>
+          <span class="badge badge-compat-teal">🔵 79%</span>
+          <span class="caption">Hanafi · Bachelor</span>
+          <div class="card-actions"><button class="btn btn-primary btn-xs" data-go="profile-view">Interest</button><button class="btn btn-outline btn-xs">🔖</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">📚 Islamic Knowledge</div>
+        <p class="body-sm">"What the Prophet ﷺ said about choosing a spouse"</p>
+        <div class="card-actions"><button class="link-btn" data-go="islamic">Read full article →</button><button class="btn btn-outline btn-xs">🔖</button></div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="active" data-go="home">🏠</button>
+      <button data-go="search">🔍</button>
+      <button class="has-dot" data-go="interests">💌</button>
+      <button class="has-dot" data-go="chat-list">💬</button>
+      <button data-go="islamic">☪️</button>
+    </nav>
+  </section>
+
+  <!-- 8. SEARCH -->
+  <section class="screen" id="screen-search">
+    <div class="topbar"><button class="back-arrow" data-go="home">←</button><span>🔍 Search matches</span></div>
+    <div class="search-controls">
+      <button class="btn btn-outline btn-sm" data-go="filters">🎛️ Filters</button>
+      <span class="caption">Sort: 92% ▾</span>
+    </div>
+    <div class="scroll-area">
+      <div class="card result-card">
+        <div class="result-head"><strong>Aisha M.</strong> <span class="caption">24 · Delhi</span></div>
+        <span class="badge badge-compat-green">🟢 92% compatible</span>
+        <p class="body-sm">Hanafi · Masters · Hijab</p>
+        <p class="why-line">"Both want children soon, prefer joint family"</p>
+        <div class="card-actions"><button class="btn btn-primary btn-sm" data-go="profile-view">Send interest</button><button class="btn btn-outline btn-sm">🔖</button></div>
+      </div>
+      <div class="card result-card">
+        <div class="result-head"><strong>Sara K.</strong> <span class="caption">26 · Lucknow</span></div>
+        <span class="badge badge-compat-teal">🔵 79% compatible</span>
+        <p class="body-sm">Hanafi · Bachelor · Hijab</p>
+        <p class="why-line">"Both prefer simple Nikah and Sunni sect"</p>
+        <div class="card-actions"><button class="btn btn-primary btn-sm" data-go="profile-view">Send interest</button><button class="btn btn-outline btn-sm">🔖</button></div>
+      </div>
+      <div class="card result-card">
+        <div class="result-head"><strong>Zara A.</strong> <span class="caption">23 · Mumbai</span></div>
+        <span class="badge badge-compat-green">🟢 87% compatible</span>
+        <p class="body-sm">Shafi'i · Bachelor · Niqab</p>
+        <p class="why-line">"Both want to relocate, similar education"</p>
+        <div class="card-actions"><button class="btn btn-primary btn-sm" data-go="profile-view">Send interest</button><button class="btn btn-outline btn-sm">🔖</button></div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button data-go="home">🏠</button>
+      <button class="active" data-go="search">🔍</button>
+      <button class="has-dot" data-go="interests">💌</button>
+      <button class="has-dot" data-go="chat-list">💬</button>
+      <button data-go="islamic">☪️</button>
+    </nav>
+  </section>
+
+  <!-- 9. FILTERS -->
+  <section class="screen" id="screen-filters">
+    <div class="topbar"><span>Filters</span><button class="back-arrow" data-go="search">✕</button></div>
+    <div class="scroll-area pad">
+      <div class="field"><label>Age range</label><p class="caption">18 ──────────────── 35</p></div>
+      <div class="field"><label>City</label><div class="pill-row"><button class="pill pill-on">Lucknow</button><button class="pill">Delhi</button><button class="pill">+more</button></div></div>
+      <div class="field"><label>Sect</label><div class="pill-row"><button class="pill pill-on">Sunni</button><button class="pill">Shafi'i</button><button class="pill">No pref</button></div></div>
+      <div class="field"><label>Salah frequency</label><div class="pill-row"><button class="pill pill-on">5x daily</button><button class="pill">Mostly</button><button class="pill">Any</button></div></div>
+      <div class="field"><label>Hijab</label><div class="pill-row"><button class="pill">Required</button><button class="pill pill-on">Preferred</button><button class="pill">No</button></div></div>
+      <div class="field"><label>Education</label><div class="pill-row"><button class="pill pill-on">Bachelor+</button><button class="pill">Master+</button><button class="pill">Any</button></div></div>
+      <div class="field"><label>Madhhab</label><div class="pill-row"><button class="pill pill-on">Hanafi</button><button class="pill">No preference</button></div></div>
+      <div class="field"><label>Nikah timeline</label><div class="pill-row"><button class="pill">ASAP</button><button class="pill pill-on">6 months</button><button class="pill">1 year</button></div></div>
+      <button class="btn btn-primary btn-full" data-go="search">Apply filters</button>
+      <button class="btn btn-ghost btn-full">Clear all</button>
+    </div>
+  </section>
+
+  <!-- 10. PROFILE VIEW -->
+  <section class="screen" id="screen-profile-view">
+    <div class="topbar"><button class="back-arrow" data-go="search">←</button><span></span><span>🔖 ⚑</span></div>
+    <div class="scroll-area pad">
+      <div class="photo-hidden-box">[ Photo hidden ]<br/><span class="caption">She set photo to "Matches only"</span></div>
+      <h2>Aisha M. <span class="caption">24 · Delhi</span></h2>
+      <span class="badge badge-green">✅ Trusted Verified</span>
+
+      <div class="card" style="margin-top:14px">
+        <span class="badge badge-compat-green">🟢 92% compatible</span>
+        <p class="body-sm" style="margin-top:6px"><strong>Why you match:</strong></p>
+        <ul class="check-list">
+          <li>✅ Both Hanafi</li>
+          <li>✅ Both want children soon</li>
+          <li>✅ Both prefer joint family</li>
+          <li>✅ Both want simple Nikah</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-label">About her</div>
+        <table class="kv-table">
+          <tr><td>Education</td><td>Masters</td></tr>
+          <tr><td>Profession</td><td>Teacher</td></tr>
+          <tr><td>City</td><td>Delhi</td></tr>
+          <tr><td>Mother tongue</td><td>Urdu</td></tr>
+          <tr><td>Languages</td><td>Urdu, Hindi, English</td></tr>
+          <tr><td>Hobbies</td><td>📖 Reading, 🕋 Quran</td></tr>
+          <tr><td>Role model</td><td>Her mother</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Religious profile</div>
+        <table class="kv-table">
+          <tr><td>Salah</td><td>5× daily</td></tr>
+          <tr><td>Hijab</td><td>Full hijab always</td></tr>
+          <tr><td>Madhhab</td><td>Hanafi</td></tr>
+          <tr><td>Sect</td><td>Sunni (Deobandi)</td></tr>
+          <tr><td>Quran</td><td>Daily reading</td></tr>
+          <tr><td>Hifz</td><td>Partial</td></tr>
+          <tr><td>Diet</td><td>Strict halal</td></tr>
+          <tr><td>Fasting</td><td>Ramadan + nafl</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Marriage expectations</div>
+        <table class="kv-table">
+          <tr><td>Timeline</td><td>Within 6 months</td></tr>
+          <tr><td>Children</td><td>Yes</td></tr>
+          <tr><td>Living</td><td>Joint family</td></tr>
+          <tr><td>Relocation</td><td>Maybe</td></tr>
+          <tr><td>Wedding</td><td>Simple Nikah</td></tr>
+          <tr><td>Parenting</td><td>Islamic school</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Wali details <span class="caption">— shown because she chose to display them</span></div>
+        <table class="kv-table">
+          <tr><td>Name</td><td>Abdul Rahman M.</td></tr>
+          <tr><td>Relationship</td><td>Father</td></tr>
+          <tr><td>Contact number</td><td>🔒 Not shown publicly — verification only</td></tr>
+        </table>
+      </div>
+
+      <div class="card locked-card">
+        <div class="card-label">Contact details</div>
+        <p class="body-sm">🔒 Upgrade to see phone and email</p>
+        <button class="btn btn-primary btn-sm" data-go="premium">Upgrade to Premium</button>
+      </div>
+
+      <div class="section-head">Similar profiles</div>
+      <div class="match-row">
+        <div class="match-card small"><div class="match-photo">🧕</div><strong>Sara K.</strong></div>
+        <div class="match-card small"><div class="match-photo">🧕</div><strong>Zara A.</strong></div>
+      </div>
+    </div>
+    <div class="sticky-footer"><button class="btn btn-primary btn-full" data-go="interests">Send interest</button></div>
+  </section>
+
+  <!-- 11. INTERESTS -->
+  <section class="screen" id="screen-interests">
+    <div class="topbar"><button class="back-arrow" data-go="home">←</button><span>Interests</span></div>
+    <div class="tabs">
+      <button class="tab active" data-tab="int-received">Received 3</button>
+      <button class="tab" data-tab="int-sent">Sent 5</button>
+    </div>
+    <div class="scroll-area pad">
+      <div class="tab-panel active" id="int-received">
+        <div class="card">
+          <div class="result-head"><strong>Ahmed K.</strong> <span class="caption">28 · Lucknow</span></div>
+          <span class="badge badge-green">✅ Trusted Verified</span>
+          <span class="badge badge-compat-green">🟢 87% compatible</span>
+          <p class="body-sm">Engineer · Masters</p>
+          <p class="body-sm">Hanafi · Full beard</p>
+          <p class="why-line">Note: "Assalamu Alaikum. I have read your profile..."</p>
+          <p class="caption">Expires in 9 days</p>
+          <button class="btn btn-outline btn-sm btn-full" data-go="profile-view">View profile</button>
+          <div class="card-actions">
+            <button class="btn btn-primary btn-sm">Accept ✅</button>
+            <button class="btn btn-outline btn-sm">Decline ✗</button>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel" id="int-sent">
+        <div class="card">
+          <div class="result-head"><strong>Aisha M.</strong> <span class="caption">24 · Delhi</span></div>
+          <span class="badge badge-compat-green">🟢 92% compatible</span>
+          <p class="body-sm">Status: ⏳ Pending</p>
+          <p class="caption">Sent 3 days ago · Expires in 11 days</p>
+          <button class="btn btn-outline btn-sm btn-full" data-go="profile-view">View profile</button>
+          <button class="btn btn-ghost btn-sm btn-full">Withdraw interest</button>
+        </div>
+        <div class="card">
+          <div class="result-head"><strong>Sara K.</strong> <span class="caption">26 · Lucknow</span></div>
+          <span class="badge badge-compat-teal">🔵 79% compatible</span>
+          <p class="body-sm">Status: ✅ Accepted</p>
+          <p class="caption">Accepted 1 day ago</p>
+          <button class="btn btn-primary btn-sm btn-full" data-go="chat-thread">Open conversation</button>
+        </div>
+        <div class="card">
+          <div class="result-head"><strong>Zara A.</strong> <span class="caption">23 · Mumbai</span></div>
+          <span class="badge badge-compat-green">🟢 87% compatible</span>
+          <p class="body-sm">Status: ✗ Declined</p>
+          <p class="why-line">"Not the right match at this time"</p>
+          <button class="btn btn-outline btn-sm btn-full" data-go="search">View similar profiles</button>
+        </div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button data-go="home">🏠</button>
+      <button data-go="search">🔍</button>
+      <button class="active has-dot" data-go="interests">💌</button>
+      <button class="has-dot" data-go="chat-list">💬</button>
+      <button data-go="islamic">☪️</button>
+    </nav>
+  </section>
+
+  <!-- 12. CHAT LIST -->
+  <section class="screen" id="screen-chat-list">
+    <div class="topbar"><span>Messages</span></div>
+    <div class="scroll-area pad">
+      <div class="chat-row" data-go="chat-thread">
+        <span class="avatar">👤</span>
+        <div class="chat-row-body"><strong>Aisha M.</strong> <span class="caption">Delhi</span><p class="body-sm">"JazakAllah for reaching out..."</p></div>
+        <div class="chat-row-meta"><span class="caption">10:32am</span><span class="dot-badge">2</span></div>
+      </div>
+      <div class="chat-row" data-go="chat-thread">
+        <span class="avatar">👤</span>
+        <div class="chat-row-body"><strong>Sara K.</strong> <span class="caption">Lucknow</span><p class="body-sm">"Wa Alaikum Assalam"</p></div>
+        <div class="chat-row-meta"><span class="caption">Yesterday</span></div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button data-go="home">🏠</button>
+      <button data-go="search">🔍</button>
+      <button class="has-dot" data-go="interests">💌</button>
+      <button class="active has-dot" data-go="chat-list">💬</button>
+      <button data-go="islamic">☪️</button>
+    </nav>
+  </section>
+
+  <!-- 13. CHAT THREAD -->
+  <section class="screen" id="screen-chat-thread">
+    <div class="topbar"><button class="back-arrow" data-go="chat-list">←</button><span>Aisha M. <span class="caption">24 Delhi</span><br/><span class="online-dot">🟢 Active recently</span></span><span>👁️</span></div>
+    <div class="chat-banner">💡 Keep conversations purposeful and Islamic <button class="dismiss-x">✕</button></div>
+    <div class="scroll-area pad chat-area">
+      <div class="bubble bubble-out">Assalamu Alaikum<span class="bubble-time">10:30am</span></div>
+      <div class="bubble bubble-in">Wa Alaikum Assalam JazakAllah for reaching out<span class="bubble-time">10:32am</span></div>
+      <div class="bubble bubble-out">I read your profile...<span class="bubble-time">10:35am</span></div>
+    </div>
+    <div class="chips-row">
+      <button class="chip">Family expectations</button>
+      <button class="chip">Islamic lifestyle</button>
+      <button class="chip">Nikah timeline</button>
+      <button class="chip">Children preferences</button>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" placeholder="Type a message..." />
+      <button class="btn btn-primary btn-xs">➤</button>
+    </div>
+  </section>
+
+  <!-- 14. ISLAMIC KNOWLEDGE -->
+  <section class="screen" id="screen-islamic">
+    <div class="topbar"><span>☪️ Islamic Knowledge</span></div>
+    <div class="scroll-area pad">
+      <div class="card reminder-card">
+        <div class="card-label">📖 Today's verse</div>
+        <p class="verse">"And of His signs..."</p>
+        <p class="verse-ref">— Qur'an 30:21</p>
+        <button class="btn btn-outline btn-sm">Share</button>
+      </div>
+      <div class="card-label">Browse by category</div>
+      <div class="pill-row wrap">
+        <button class="pill">💒 Marriage in Islam</button>
+        <button class="pill">⚖️ Rights &amp; Duties</button>
+        <button class="pill">🤝 Choosing a Spouse</button>
+        <button class="pill">🤲 Istikhara Guide</button>
+        <button class="pill">💬 Communication</button>
+        <button class="pill">👨‍👩‍👧 Family Life</button>
+      </div>
+      <div class="card">
+        <div class="card-label">Featured article</div>
+        <p class="body-sm">"What the Prophet ﷺ said about choosing a spouse"</p>
+        <p class="body-sm">The Prophet ﷺ said...</p>
+        <div class="card-actions"><button class="link-btn">Read full article →</button><button class="btn btn-outline btn-xs">🔖</button></div>
+      </div>
+      <div class="card">
+        <div class="card-label">This week's Hadith</div>
+        <p class="body-sm">"Whoever Allah blesses with a righteous wife..."</p>
+        <div class="card-actions"><button class="btn btn-outline btn-xs">Share</button><button class="btn btn-outline btn-xs">🔖</button></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Istikhara Guide</div>
+        <p class="body-sm">Step by step guide to performing Istikhara for marriage</p>
+        <button class="link-btn">Read guide →</button>
+      </div>
+      <div class="card">
+        <div class="card-label">Ask a question</div>
+        <p class="body-sm">Submit an Islamic marriage question for our scholar team</p>
+        <button class="btn btn-outline btn-sm">Submit question →</button>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button data-go="home">🏠</button>
+      <button data-go="search">🔍</button>
+      <button class="has-dot" data-go="interests">💌</button>
+      <button class="has-dot" data-go="chat-list">💬</button>
+      <button class="active" data-go="islamic">☪️</button>
+    </nav>
+  </section>
+
+  <!-- 15. PROFILE SETTINGS -->
+  <section class="screen" id="screen-settings">
+    <div class="topbar"><button class="back-arrow" data-go="home">←</button><span>My Profile</span><span class="link-btn">Edit</span></div>
+    <div class="scroll-area pad">
+      <div class="profile-row"><span class="avatar">👤</span><div><strong>Ahmed K.</strong> 28 Lucknow<br/><span class="badge badge-green">✅ Trusted Verified</span></div></div>
+      <p class="body-sm">Profile: 82% complete</p>
+      <div class="settings-list">
+        <div class="card-label">Edit profile</div>
+        <button class="settings-row">Personal details ›</button>
+        <button class="settings-row">Religious identity ›</button>
+        <button class="settings-row">Career &amp; education ›</button>
+        <button class="settings-row">Location ›</button>
+        <button class="settings-row">Marriage intentions ›</button>
+        <button class="settings-row">Partner preferences ›</button>
+        <button class="settings-row">Religious preferences ›</button>
+      </div>
+      <div class="settings-list">
+        <div class="card-label">Privacy settings</div>
+        <button class="settings-row">Photo visibility — Public / Matches / Hidden ›</button>
+        <button class="settings-row">Who can see my profile ›</button>
+        <button class="settings-row">Block list ›</button>
+      </div>
+      <div class="settings-list">
+        <div class="card-label">Account settings</div>
+        <button class="settings-row">Change phone number ›</button>
+        <button class="settings-row">Change email ›</button>
+        <button class="settings-row">Notification preferences ›</button>
+        <button class="settings-row">Language (EN / HI / UR) ›</button>
+        <button class="settings-row" data-go="premium">Subscription status ›</button>
+      </div>
+      <div class="settings-list">
+        <div class="card-label">Islamic preferences</div>
+        <button class="settings-row">Wali involvement mode ›</button>
+        <button class="settings-row">Display Wali details on profile ›</button>
+        <button class="settings-row">Show Wali contact on profile ›</button>
+        <button class="settings-row">Proposal contact preference ›</button>
+      </div>
+      <div class="settings-list">
+        <div class="card-label">Support</div>
+        <button class="settings-row">Help centre ›</button>
+        <button class="settings-row">Report a problem ›</button>
+        <button class="settings-row">Islamic principles ›</button>
+        <button class="settings-row">Privacy policy ›</button>
+        <button class="settings-row">Terms of service ›</button>
+      </div>
+      <button class="btn btn-outline btn-full">Pause my profile</button>
+      <button class="btn btn-danger btn-full">Delete my account</button>
+    </div>
+  </section>
+
+  <!-- 16. NOTIFICATIONS -->
+  <section class="screen" id="screen-notifications">
+    <div class="topbar"><button class="back-arrow" data-go="home">←</button><span>Notifications</span></div>
+    <div class="scroll-area pad">
+      <div class="card-label">Today</div>
+      <div class="notif-row"><span class="notif-icon">💌</span><div><strong>New interest</strong><p class="body-sm">Ahmed K. sent you an interest · 2 hours ago</p><button class="link-btn" data-go="profile-view">View profile</button></div></div>
+      <div class="notif-row"><span class="notif-icon">✅</span><div><strong>Interest accepted</strong><p class="body-sm">Sara K. accepted your interest · 5 hours ago</p><button class="link-btn" data-go="chat-thread">Open conversation</button></div></div>
+      <div class="card-label">Yesterday</div>
+      <div class="notif-row"><span class="notif-icon">📖</span><div><strong>Friday Reminder</strong><p class="body-sm">"And of His signs is that He created..."</p><button class="link-btn" data-go="islamic">Read more</button></div></div>
+      <div class="notif-row"><span class="notif-icon">👁️</span><div><strong>Profile views</strong><p class="body-sm">8 sisters viewed your profile this week</p></div></div>
+      <div class="notif-row"><span class="notif-icon">⌛</span><div><strong>Interest expired</strong><p class="body-sm">Your interest to Zara A. expired after 14 days</p><button class="link-btn" data-go="search">View similar profiles</button></div></div>
+    </div>
+  </section>
+
+  <!-- 17. PREMIUM -->
+  <section class="screen" id="screen-premium">
+    <div class="topbar"><button class="back-arrow" data-go="settings">←</button><span>Upgrade</span></div>
+    <div class="scroll-area pad">
+      <div class="center"><span style="font-size:2rem">⭐</span></div>
+      <h2 class="center">Unlock full access</h2>
+      <p class="caption center">Connect directly with serious matches</p>
+
+      <div class="plan-card">
+        <div class="plan-name">SILVER</div>
+        <div class="plan-price">₹499 / month</div>
+        <ul class="plan-features">
+          <li>✅ 25 interests/mo</li><li>✅ Basic filters</li><li>✅ Messaging</li>
+          <li class="off">❌ Contact details</li><li class="off">❌ Who viewed you</li>
+        </ul>
+        <button class="btn btn-outline btn-full">Choose Silver</button>
+      </div>
+
+      <div class="plan-card plan-popular">
+        <div class="plan-name">GOLD <span class="badge badge-amber">⭐ Popular</span></div>
+        <div class="plan-price">₹999 / month</div>
+        <ul class="plan-features">
+          <li>✅ Unlimited interests</li><li>✅ Advanced filters</li><li>✅ Messaging</li>
+          <li>✅ Contact details</li><li>✅ Who viewed you</li><li>✅ Priority in search</li>
+        </ul>
+        <button class="btn btn-primary btn-full">Choose Gold</button>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-name">PLATINUM 👑</div>
+        <div class="plan-price">₹1,999 / month</div>
+        <ul class="plan-features">
+          <li>✅ All Gold features</li><li>✅ Profile boost 2x</li><li>✅ Concierge assist</li>
+          <li>✅ Dedicated support</li><li>✅ Verified badge</li>
+        </ul>
+        <button class="btn btn-outline btn-full">Choose Platinum</button>
+      </div>
+      <p class="caption center">Powered by Razorpay 🔒 · Cancel anytime</p>
+    </div>
+  </section>
+
+  <!-- 18. ADMIN DASHBOARD -->
+  <section class="screen admin" id="screen-admin-dashboard">
+    <div class="topbar admin-topbar"><span>Nikah Platform — Admin</span></div>
+    <div class="scroll-area pad">
+      <div class="card-label">Today's overview</div>
+      <div class="admin-stats">
+        <div class="stat"><strong>24</strong><span class="caption">New registrations</span></div>
+        <div class="stat"><strong>8</strong><span class="caption">Selfies pending</span></div>
+        <div class="stat"><strong>3</strong><span class="caption">Reports pending</span></div>
+        <div class="stat warn"><strong>1</strong><span class="caption">Fraud alerts</span></div>
+        <div class="stat"><strong>1,204</strong><span class="caption">Active users</span></div>
+        <div class="stat"><strong>₹12,499</strong><span class="caption">Revenue today</span></div>
+      </div>
+      <div class="card-label">Quick actions</div>
+      <div class="pill-row wrap">
+        <button class="btn btn-outline btn-sm">Review selfies</button>
+        <button class="btn btn-outline btn-sm">View reports</button>
+        <button class="btn btn-outline btn-sm">Fraud queue</button>
+        <button class="btn btn-outline btn-sm" data-go="admin-content">Add Islamic content</button>
+      </div>
+      <div class="card-label">Navigation</div>
+      <div class="settings-list">
+        <button class="settings-row">Dashboard ›</button>
+        <button class="settings-row">Users ›</button>
+        <button class="settings-row">Verification queue ›</button>
+        <button class="settings-row">Reports queue ›</button>
+        <button class="settings-row">Fraud queue ›</button>
+        <button class="settings-row">Risk monitoring ›</button>
+        <button class="settings-row" data-go="admin-content">Islamic content ›</button>
+        <button class="settings-row">Notifications manager ›</button>
+        <button class="settings-row">Analytics ›</button>
+        <button class="settings-row">Subscriptions ›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19. ADMIN — ISLAMIC CONTENT MANAGER -->
+  <section class="screen admin" id="screen-admin-content">
+    <div class="topbar admin-topbar"><button class="back-arrow" data-go="admin-dashboard">←</button><span>Islamic Content Manager</span><button class="link-btn" data-go="admin-add-content">+ Add</button></div>
+    <div class="scroll-area pad">
+      <div class="pill-row">
+        <button class="pill pill-on">All</button><button class="pill">Verse</button><button class="pill">Hadith</button>
+        <button class="pill">Article</button><button class="pill">Tip</button>
+      </div>
+      <div class="card">
+        <strong>Qur'an 30:21</strong>
+        <table class="kv-table">
+          <tr><td>Type</td><td>Verse</td></tr>
+          <tr><td>Category</td><td>Marriage</td></tr>
+          <tr><td>Scheduled</td><td>Friday</td></tr>
+          <tr><td>Status</td><td>✅ Active</td></tr>
+        </table>
+        <div class="card-actions"><button class="btn btn-outline btn-xs">Edit</button><button class="btn btn-outline btn-xs">Delete</button></div>
+      </div>
+      <div class="card">
+        <strong>"What the Prophet ﷺ said about spouse"</strong>
+        <table class="kv-table">
+          <tr><td>Type</td><td>Article</td></tr>
+          <tr><td>Category</td><td>Choosing</td></tr>
+          <tr><td>Scheduled</td><td>3 Jul</td></tr>
+          <tr><td>Status</td><td>⏳ Scheduled</td></tr>
+        </table>
+        <div class="card-actions"><button class="btn btn-outline btn-xs">Edit</button><button class="btn btn-outline btn-xs">Delete</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20. ADMIN — ADD ISLAMIC CONTENT -->
+  <section class="screen admin" id="screen-admin-add-content">
+    <div class="topbar admin-topbar"><button class="back-arrow" data-go="admin-content">←</button><span>Add Islamic Content</span></div>
+    <div class="scroll-area pad">
+      <div class="field"><label>Content type</label><div class="pill-row"><button class="pill pill-on">Verse</button><button class="pill">Hadith</button><button class="pill">Article</button><button class="pill">Tip</button><button class="pill">Du'a</button></div></div>
+      <div class="field"><label>Category</label><select><option>Marriage in Islam ▾</option></select></div>
+      <div class="field"><label>Title (optional)</label><input type="text" /></div>
+      <div class="field"><label>Content (English)</label><textarea></textarea></div>
+      <div class="field"><label>Content (Hindi)</label><textarea></textarea></div>
+      <div class="field"><label>Source / Reference</label><input type="text" /></div>
+      <div class="field"><label>Schedule</label><div class="pill-row"><button class="pill pill-on">Daily</button><button class="pill">Friday only</button><button class="pill">Specific date</button></div></div>
+      <button class="btn btn-primary btn-full">Save and publish</button>
+      <button class="btn btn-outline btn-full">Save as draft</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="prototype.js"></script>
+</body>
+</html>

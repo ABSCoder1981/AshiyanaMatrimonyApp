@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nikah Platform — Quick-Match Wizard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+  :root {
+    --green:#1a7a4a; --green-l:#e6f4ed; --green-m:#2da06a;
+    --teal:#0d9488; --teal-l:#ccfbf1;
+    --grey-50:#f9fafb; --grey-100:#f3f4f6; --grey-200:#e5e7eb;
+    --grey-400:#9ca3af; --grey-600:#4b5563; --grey-800:#1f2937;
+    --radius:10px; --shadow:0 2px 12px rgba(0,0,0,.10);
+    --font:'Segoe UI', system-ui, sans-serif;
+  }
+  body { font-family:var(--font); background:var(--grey-50); color:var(--grey-800); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:0 0 60px; }
+
+  .site-header { width:100%; background:var(--green); color:#fff; padding:14px 16px; position:sticky; top:0; z-index:60; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .site-header h1 { font-size:1.05rem; font-weight:700; }
+  .lang-toggle { display:flex; background:rgba(255,255,255,.15); border-radius:99px; padding:3px; flex-shrink:0; }
+  .lang-toggle button { border:none; background:transparent; color:#fff; font-size:.8rem; font-weight:600; padding:6px 14px; border-radius:99px; cursor:pointer; font-family:var(--font); }
+  .lang-toggle button.active { background:#fff; color:var(--green); }
+
+  .card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); width:100%; max-width:480px; margin:24px 16px 0; padding:24px 24px 28px; min-height:420px; display:flex; flex-direction:column; }
+
+  /* Top bar: back + dots */
+  .qm-top { display:flex; align-items:center; gap:10px; margin-bottom:28px; min-height:24px; }
+  .qm-back { background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--grey-600); padding:0; visibility:hidden; }
+  .qm-back.show { visibility:visible; }
+  .qm-dots { display:flex; gap:6px; flex:1; justify-content:center; }
+  .qm-dot { width:8px; height:8px; border-radius:50%; background:var(--grey-200); transition:all .2s; }
+  .qm-dot.done { background:var(--green-m); }
+  .qm-dot.active { background:var(--green); width:20px; border-radius:4px; }
+  .qm-top-spacer { width:1.2rem; }
+
+  /* Question viewport */
+  .qm-viewport { flex:1; overflow:hidden; position:relative; }
+  #qm-question { transition: transform .28s ease-out, opacity .28s ease-out; }
+  .qm-exit-left  { transform:translateX(-24px); opacity:0; }
+  .qm-exit-right { transform:translateX(24px);  opacity:0; }
+  .qm-enter-right-start { transform:translateX(24px);  opacity:0; transition:none !important; }
+  .qm-enter-left-start  { transform:translateX(-24px); opacity:0; transition:none !important; }
+  .qm-enter-active { transform:translateX(0); opacity:1; }
+  @media (prefers-reduced-motion: reduce) {
+    #qm-question { transition: opacity .15s linear !important; }
+    .qm-exit-left, .qm-exit-right, .qm-enter-right-start, .qm-enter-left-start { transform:none !important; }
+  }
+
+  .qm-question-text { font-size:1.15rem; font-weight:700; color:var(--grey-800); margin-bottom:22px; line-height:1.4; }
+
+  /* Pills */
+  .qm-pill-group { display:flex; flex-wrap:wrap; gap:10px; }
+  .qm-pill { padding:9px 18px; border:1.5px solid var(--grey-200); border-radius:99px; font-size:.9rem; cursor:pointer; background:#fff; color:var(--grey-800); font-family:var(--font); transition:transform .15s; }
+  .qm-pill.selected { background:var(--green); border-color:var(--green); color:#fff; font-weight:600; }
+  .qm-pill.bump { transform:scale(1.04); }
+
+  /* Inputs */
+  .qm-field { margin-bottom:14px; }
+  .qm-field label { display:block; font-size:.8rem; font-weight:600; color:var(--grey-600); margin-bottom:6px; }
+  .qm-field select, .qm-field input[type="text"], .qm-field input[type="number"] {
+    width:100%; padding:10px 12px; border:1.5px solid var(--grey-200); border-radius:8px;
+    font-size:.92rem; font-family:var(--font); color:var(--grey-800); background:#fff;
+  }
+  .qm-field select:focus, .qm-field input:focus { outline:none; border-color:var(--green-m); }
+  .qm-range-row { display:flex; align-items:center; gap:10px; }
+  .qm-range-row input { flex:1; }
+  .qm-range-row span { color:var(--grey-600); font-size:.85rem; }
+
+  /* Reli level scale */
+  .qm-reli-scale { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:10px 0; width:100%; }
+  .qm-reli-scale label { cursor:pointer; }
+  .qm-reli-scale input[type="radio"] { display:none; }
+  .qm-reli-scale input + .qm-reli-opt { display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 4px 8px; border:1.5px solid var(--grey-200); border-radius:10px; transition:all .18s; }
+  .qm-reli-scale input:checked + .qm-reli-opt { border-color:var(--teal); background:#e6f6f5; }
+  .qm-reli-num { font-size:1.1rem; font-weight:700; color:var(--teal); }
+  .qm-reli-lbl { font-size:.63rem; color:var(--grey-600); text-align:center; line-height:1.25; font-weight:600; }
+  .qm-reli-desc { font-size:.57rem; color:var(--grey-400); text-align:center; line-height:1.2; }
+
+  .qm-skip { display:inline-block; margin-top:18px; font-size:.85rem; color:var(--grey-600); text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--font); }
+
+  .qm-bottom { margin-top:auto; padding-top:18px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:12px 22px; border-radius:8px; font-size:.92rem; font-weight:600; cursor:pointer; border:none; font-family:var(--font); transition:opacity .15s; }
+  .btn-primary { background:var(--green); color:#fff; width:100%; }
+  .btn-primary:hover { opacity:.92; }
+  .btn-outline { background:#fff; color:var(--green); border:1.5px solid var(--green); width:100%; }
+
+  .hidden { display:none !important; }
+
+  /* Loading screen */
+  .qm-loading { text-align:center; margin:auto 0; }
+  .qm-loading .icon { font-size:3rem; margin-bottom:16px; }
+  .qm-loading h2 { font-size:1.1rem; font-weight:700; color:var(--green); margin-bottom:18px; }
+  .qm-loading-track { height:6px; background:var(--grey-200); border-radius:99px; overflow:hidden; max-width:240px; margin:0 auto; }
+  .qm-loading-fill { height:100%; width:0%; background:var(--green-m); border-radius:99px; }
+
+  /* Results */
+  .qm-results-header { margin-bottom:16px; }
+  .qm-results-header h2 { font-size:1.05rem; font-weight:700; color:var(--grey-800); }
+  .qm-results-header p { font-size:.8rem; color:var(--grey-600); margin-top:2px; }
+  .qm-result-card { border:1px solid var(--grey-200); border-radius:10px; padding:14px; margin-bottom:12px; }
+  .qm-result-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .qm-result-top strong { font-size:.95rem; }
+  .qm-result-top span.meta { font-size:.8rem; color:var(--grey-600); }
+  .qm-badge-good { display:inline-block; background:var(--teal-l); color:var(--teal); font-size:.75rem; font-weight:700; padding:3px 10px; border-radius:99px; margin-bottom:8px; }
+  .qm-result-detail { font-size:.82rem; color:var(--grey-600); }
+  .qm-empty { text-align:center; padding:30px 10px; color:var(--grey-600); font-size:.9rem; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1 data-t="brandTitle">Quick-Match Wizard</h1>
+  <div class="lang-toggle" id="lang-toggle">
+    <button type="button" data-lang="en" class="active">English</button>
+    <button type="button" data-lang="hi">हिंदी</button>
+  </div>
+</header>
+
+<!-- ══ QUESTION CARD ══ -->
+<div class="card" id="qm-card">
+  <div class="qm-top">
+    <button class="qm-back" id="qm-back">←</button>
+    <div class="qm-dots" id="qm-dots"></div>
+    <div class="qm-top-spacer"></div>
+  </div>
+  <div class="qm-viewport">
+    <div id="qm-question"></div>
+  </div>
+  <div class="qm-bottom">
+    <button class="qm-skip" id="qm-skip-all" style="display:block;margin-bottom:6px"></button>
+    <button class="qm-skip hidden" id="qm-skip-wizard" style="display:block;margin-bottom:10px"></button>
+    <button class="btn btn-primary" id="qm-next"></button>
+  </div>
+</div>
+
+<!-- ══ LOADING CARD ══ -->
+<div class="card hidden" id="qm-loading-card">
+  <div class="qm-loading">
+    <div class="icon">☪️</div>
+    <h2 id="qm-loading-text"></h2>
+    <div class="qm-loading-track"><div class="qm-loading-fill" id="qm-loading-fill"></div></div>
+  </div>
+</div>
+
+<!-- ══ RESULTS CARD ══ -->
+<div class="card hidden" id="qm-results-card">
+  <div class="qm-results-header">
+    <h2 data-t="resultsTitle">Suggested for you</h2>
+    <p data-t="resultsSub">Based on your quick answers — refine anytime by completing your full profile.</p>
+  </div>
+  <div id="qm-results-list"></div>
+  <div id="qm-empty-state" class="qm-empty hidden">
+    <p data-t="emptyState">We're still growing in your area. Complete your profile to widen your search and get notified as new members join.</p>
+  </div>
+  <div class="qm-bottom" style="margin-top:18px">
+    <button class="btn btn-primary" id="qm-continue-profile" data-t="btnContinueProfile">Complete my full profile →</button>
+    <button class="btn btn-outline" id="qm-browse" style="margin-top:10px" data-t="btnBrowse">Skip — just browse for now</button>
+    <button class="qm-skip" id="qm-toggle-empty" style="margin-top:14px"></button>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+let LANG = 'en';
+
+const T = {
+  brandTitle:{en:'Quick-Match Wizard',hi:'क्विक-मैच विज़ार्ड'},
+  qNext:{en:'Next →',hi:'आगे →'},
+  qFindMatches:{en:'Find matches →',hi:'मैच ढूंढें →'},
+  qSkip:{en:'Skip — not sure yet',hi:'छोड़ें — अभी निश्चित नहीं'},
+  qSkipWizard:{en:'Skip and browse',hi:'छोड़ें और ब्राउज़ करें'},
+  loading1:{en:'Bismillah — finding your matches...',hi:'बिस्मिल्लाह — आपके मैच ढूंढे जा रहे हैं...'},
+  resultsTitle:{en:'Suggested for you',hi:'आपके लिए सुझाव'},
+  resultsSub:{en:'Based on your quick answers — refine anytime by completing your full profile.',hi:'आपके त्वरित उत्तरों के आधार पर — अपनी पूरी प्रोफ़ाइल भरकर कभी भी इसे बेहतर बनाएं।'},
+  emptyState:{en:"We're still growing in your area. Complete your profile to widen your search and get notified as new members join.",hi:'हम आपके क्षेत्र में अभी बढ़ रहे हैं। अपनी खोज को व्यापक बनाने और नए सदस्यों के जुड़ने पर सूचना पाने के लिए अपनी प्रोफ़ाइल पूरी करें।'},
+  btnContinueProfile:{en:'Complete my full profile →',hi:'अपनी पूरी प्रोफ़ाइल भरें →'},
+  btnBrowse:{en:'Skip — just browse for now',hi:'छोड़ें — अभी सिर्फ़ ब्राउज़ करें'},
+  toggleEmptyShow:{en:'Preview: few results state',hi:'पूर्वावलोकन: कम परिणाम स्थिति'},
+  toggleEmptyHide:{en:'Preview: normal results state',hi:'पूर्वावलोकन: सामान्य परिणाम स्थिति'},
+  good:{en:'🔵 Good match',hi:'🔵 अच्छा मैच'},
+
+  q1:{en:'Where are you looking for a match?',hi:'आप कहाँ साथी की तलाश कर रहे हैं?'},
+  q2:{en:'What age range are you looking for?',hi:'आप किस आयु सीमा की तलाश कर रहे हैं?'},
+  q3:{en:'Which sect matters to you?',hi:'आपके लिए कौन सा संप्रदाय महत्वपूर्ण है?'},
+  q4:{en:'How regularly should they pray?',hi:'उन्हें कितनी नियमितता से नमाज़ पढ़नी चाहिए?'},
+  q5:{en:'How religious would you like them to be overall?',hi:'आप चाहते हैं कि वे कुल मिलाकर कितने धार्मिक हों?'},
+  q6:{en:'Any preference on marital history?',hi:'वैवाहिक इतिहास पर कोई प्राथमिकता?'},
+  q7:{en:'How soon are they looking to marry?',hi:'वे कितनी जल्दी विवाह करना चाहते हैं?'},
+
+  phCountry:{en:'— select country —',hi:'— देश चुनें —'},
+  phState:{en:'— select state —',hi:'— राज्य चुनें —'},
+  phCity:{en:'Type your city',hi:'अपना शहर टाइप करें'},
+  phMinAge:{en:'Min age',hi:'न्यूनतम आयु'},
+  phMaxAge:{en:'Max age',hi:'अधिकतम आयु'},
+  toLabel:{en:'to',hi:'से'}
+};
+
+function t(key){ return T[key] ? T[key][LANG] : key; }
+
+/* ── Location dataset (ported from the full profile form, Part 1 Location) ── */
+const COUNTRY = [
+  {v:'IN',en:'India',hi:'भारत'},{v:'AE',en:'UAE',hi:'यूएई'},{v:'GB',en:'UK',hi:'यूके'},{v:'US',en:'USA',hi:'यूएसए'},
+  {v:'CA',en:'Canada',hi:'कनाडा'},{v:'AU',en:'Australia',hi:'ऑस्ट्रेलिया'},{v:'SA',en:'Saudi Arabia',hi:'सऊदी अरब'},
+  {v:'QA',en:'Qatar',hi:'क़तर'},{v:'MY',en:'Malaysia',hi:'मलेशिया'},{v:'PK',en:'Pakistan',hi:'पाकिस्तान'},
+  {v:'BD',en:'Bangladesh',hi:'बांग्लादेश'},{v:'other',en:'Other',hi:'अन्य'}
+];
+const STATES = [
+  {v:'AP',en:'Andhra Pradesh',hi:'आंध्र प्रदेश'},{v:'AR',en:'Arunachal Pradesh',hi:'अरुणाचल प्रदेश'},{v:'AS',en:'Assam',hi:'असम'},
+  {v:'BR',en:'Bihar',hi:'बिहार'},{v:'CG',en:'Chhattisgarh',hi:'छत्तीसगढ़'},{v:'GA',en:'Goa',hi:'गोवा'},
+  {v:'GJ',en:'Gujarat',hi:'गुजरात'},{v:'HR',en:'Haryana',hi:'हरियाणा'},{v:'HP',en:'Himachal Pradesh',hi:'हिमाचल प्रदेश'},
+  {v:'JH',en:'Jharkhand',hi:'झारखंड'},{v:'KA',en:'Karnataka',hi:'कर्नाटक'},{v:'KL',en:'Kerala',hi:'केरल'},
+  {v:'MP',en:'Madhya Pradesh',hi:'मध्य प्रदेश'},{v:'MH',en:'Maharashtra',hi:'महाराष्ट्र'},{v:'MN',en:'Manipur',hi:'मणिपुर'},
+  {v:'ML',en:'Meghalaya',hi:'मेघालय'},{v:'MZ',en:'Mizoram',hi:'मिज़ोरम'},{v:'NL',en:'Nagaland',hi:'नागालैंड'},
+  {v:'OD',en:'Odisha',hi:'ओडिशा'},{v:'PB',en:'Punjab',hi:'पंजाब'},{v:'RJ',en:'Rajasthan',hi:'राजस्थान'},
+  {v:'SK',en:'Sikkim',hi:'सिक्किम'},{v:'TN',en:'Tamil Nadu',hi:'तमिलनाडु'},{v:'TS',en:'Telangana',hi:'तेलंगाना'},
+  {v:'TR',en:'Tripura',hi:'त्रिपुरा'},{v:'UP',en:'Uttar Pradesh',hi:'उत्तर प्रदेश'},{v:'UK',en:'Uttarakhand',hi:'उत्तराखंड'},
+  {v:'WB',en:'West Bengal',hi:'पश्चिम बंगाल'},{v:'DL',en:'Delhi',hi:'दिल्ली'},{v:'JK',en:'Jammu & Kashmir',hi:'जम्मू और कश्मीर'}
+];
+const CITIES_BY_STATE = {
+  MH:['Mumbai','Pune','Nagpur','Nashik','Thane'], UP:['Lucknow','Kanpur','Agra','Varanasi','Noida'],
+  KA:['Bengaluru','Mysuru','Hubli','Mangaluru'], TN:['Chennai','Coimbatore','Madurai','Salem'],
+  KL:['Thiruvananthapuram','Kochi','Kozhikode','Thrissur'], TS:['Hyderabad','Warangal','Nizamabad'],
+  AP:['Visakhapatnam','Vijayawada','Guntur'], WB:['Kolkata','Howrah','Siliguri'],
+  GJ:['Ahmedabad','Surat','Vadodara'], RJ:['Jaipur','Jodhpur','Udaipur'],
+  MP:['Bhopal','Indore','Jabalpur'], BR:['Patna','Gaya','Bhagalpur'],
+  DL:['New Delhi','Dwarka','Rohini'], PB:['Ludhiana','Amritsar','Jalandhar'],
+  HR:['Faridabad','Gurugram','Panipat'], JK:['Srinagar','Jammu','Anantnag'], AS:['Guwahati','Silchar','Dibrugarh']
+};
+
+/* ── Pill option sets ── */
+const SECT = [{v:'noPref',en:'No preference',hi:'कोई प्राथमिकता नहीं'},{v:'sunni',en:'Sunni',hi:'सुन्नी'},{v:'shia',en:'Shia',hi:'शिया'},{v:'justMuslim',en:'Just Muslim',hi:'सिर्फ़ मुस्लिम'}];
+const SALAH = [{v:'noPref',en:'No preference',hi:'कोई प्राथमिकता नहीं'},{v:'5x',en:'5× daily',hi:'दिन में 5 बार'},{v:'mostly',en:'Mostly regular',hi:'अधिकतर नियमित'},{v:'anyPracticing',en:'Any practicing level',hi:'कोई भी पाबंद स्तर'}];
+const MARITAL_PREF = [{v:'noPref',en:'No preference',hi:'कोई प्राथमिकता नहीं'},{v:'neverOnly',en:'Never married only',hi:'केवल अविवाहित'},{v:'divorcedOk',en:'Open to divorced',hi:'तलाकशुदा के लिए खुला'},{v:'widowedOk',en:'Open to widowed',hi:'विधवा/विधुर के लिए खुला'}];
+const TIMELINE = [{v:'noPref',en:'No preference',hi:'कोई प्राथमिकता नहीं'},{v:'asap',en:'ASAP',hi:'जल्द से जल्द'},{v:'6mo',en:'Within 6 months',hi:'6 महीनों के भीतर'},{v:'1yr',en:'Within a year',hi:'एक साल के भीतर'}];
+const RELI_SCALE = [
+  {v:'1',en:'Cultural',hi:'सांस्कृतिक',enDesc:'Muslim by heritage; not currently practicing',hiDesc:'विरासत से मुस्लिम; अभी अमल नहीं'},
+  {v:'2',en:'Occasional',hi:'कभी-कभी',enDesc:'Prays & fasts sometimes; working on consistency',hiDesc:'कभी-कभी नमाज़ व रोज़ा; सुधार की कोशिश'},
+  {v:'3',en:'Moderate',hi:'मध्यम',enDesc:'Regular prayers & halal diet; open to flexibility',hiDesc:'नियमित नमाज़ व हलाल; लचीलापन भी'},
+  {v:'4',en:'Practicing',hi:'पाबंद',enDesc:'5 daily prayers; Islamic values guide daily life',hiDesc:'5 वक़्त नमाज़; दैनिक जीवन में इस्लामी मूल्य'},
+  {v:'5',en:'Highly observant',hi:'अत्यधिक पाबंद',enDesc:'Islam is central to every aspect of life',hiDesc:'दीन हर पहलू में सर्वोपरि'}
+];
+
+function optLabel(o){ return LANG==='hi' ? o.hi : o.en; }
+
+/* ── State ── */
+const ANSWERS = { country:'', state:'', city:'', ageMin:'', ageMax:'', sect:'', salah:'', religiosity:'', maritalPref:'', timeline:'' };
+let currentQ = 1;
+const TOTAL_Q = 7;
+
+/* ── Question renderers ── */
+function renderQ1(container){
+  container.innerHTML = `
+    <div class="qm-question-text">${t('q1')}</div>
+    <div class="qm-field"><label>${t('q1')}</label>
+      <select id="qm-country"></select>
+    </div>
+    <div class="qm-field hidden" id="qm-state-wrap"><select id="qm-state"></select></div>
+    <div class="qm-field hidden" id="qm-city-wrap"><input type="text" id="qm-city" /></div>
+  `;
+  const countrySel = $('qm-country');
+  countrySel.innerHTML = `<option value="">${t('phCountry')}</option>` + COUNTRY.map(o=>`<option value="${o.v}">${optLabel(o)}</option>`).join('');
+  countrySel.value = ANSWERS.country;
+  toggleIndiaFields(ANSWERS.country==='IN');
+  countrySel.addEventListener('change', ()=>{
+    ANSWERS.country = countrySel.value;
+    ANSWERS.state=''; ANSWERS.city='';
+    toggleIndiaFields(ANSWERS.country==='IN');
+  });
+
+  const stateSel = $('qm-state');
+  function fillStates(){
+    stateSel.innerHTML = `<option value="">${t('phState')}</option>` + STATES.map(o=>`<option value="${o.v}">${optLabel(o)}</option>`).join('');
+    stateSel.value = ANSWERS.state;
+  }
+  fillStates();
+  stateSel.addEventListener('change', ()=>{ ANSWERS.state = stateSel.value; ANSWERS.city=''; $('qm-city').value=''; });
+
+  const cityInp = $('qm-city');
+  cityInp.placeholder = t('phCity');
+  cityInp.value = ANSWERS.city;
+  cityInp.addEventListener('input', ()=>{ ANSWERS.city = cityInp.value; });
+
+  function toggleIndiaFields(isIndia){
+    $('qm-state-wrap').classList.toggle('hidden', !isIndia);
+    $('qm-city-wrap').classList.toggle('hidden', !isIndia);
+  }
+}
+
+function renderQ2(container){
+  container.innerHTML = `
+    <div class="qm-question-text">${t('q2')}</div>
+    <div class="qm-range-row">
+      <input type="number" id="qm-age-min" min="18" max="70" placeholder="${t('phMinAge')}" value="${ANSWERS.ageMin}" />
+      <span>${t('toLabel')}</span>
+      <input type="number" id="qm-age-max" min="18" max="70" placeholder="${t('phMaxAge')}" value="${ANSWERS.ageMax}" />
+    </div>
+  `;
+  $('qm-age-min').addEventListener('input', e=>ANSWERS.ageMin = e.target.value);
+  $('qm-age-max').addEventListener('input', e=>ANSWERS.ageMax = e.target.value);
+}
+
+function renderPillQuestion(container, qKey, options, answerKey){
+  container.innerHTML = `<div class="qm-question-text">${t(qKey)}</div><div class="qm-pill-group" id="qm-pills"></div>`;
+  const wrap = $('qm-pills');
+  options.forEach(o=>{
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='qm-pill' + (ANSWERS[answerKey]===o.v ? ' selected' : '');
+    btn.textContent = optLabel(o);
+    btn.addEventListener('click', ()=>{
+      ANSWERS[answerKey] = o.v;
+      [...wrap.children].forEach(c=>c.classList.remove('selected'));
+      btn.classList.add('selected');
+      btn.classList.add('bump');
+      setTimeout(()=>btn.classList.remove('bump'), 150);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function renderQ5(container){
+  container.innerHTML = `
+    <div class="qm-question-text">${t('q5')}</div>
+    <div class="qm-reli-scale" id="qm-reli"></div>
+  `;
+  const scaleEl = $('qm-reli');
+  RELI_SCALE.forEach(o=>{
+    const id = 'qm-reli-'+o.v;
+    const wrap = document.createElement('label');
+    const inp = document.createElement('input');
+    inp.type='radio'; inp.name='qmReli'; inp.value=o.v; inp.id=id;
+    if(String(ANSWERS.religiosity)===String(o.v)) inp.checked = true;
+    const opt = document.createElement('div');
+    opt.className='qm-reli-opt';
+    const num = document.createElement('span');
+    num.className='qm-reli-num'; num.textContent=o.v;
+    const lbl = document.createElement('span');
+    lbl.className='qm-reli-lbl'; lbl.textContent=optLabel(o);
+    const desc = document.createElement('span');
+    desc.className='qm-reli-desc'; desc.textContent=LANG==='hi'?o.hiDesc:o.enDesc;
+    opt.appendChild(num); opt.appendChild(lbl); opt.appendChild(desc);
+    wrap.appendChild(inp); wrap.appendChild(opt);
+    inp.addEventListener('change', ()=>{ ANSWERS.religiosity = o.v; });
+    scaleEl.appendChild(wrap);
+  });
+}
+
+const QUESTIONS = [
+  { render: renderQ1, answered: ()=>!!(ANSWERS.country) },
+  { render: renderQ2, answered: ()=>!!(ANSWERS.ageMin || ANSWERS.ageMax) },
+  { render: c=>renderPillQuestion(c,'q3',SECT,'sect'), answered: ()=>!!ANSWERS.sect },
+  { render: c=>renderPillQuestion(c,'q4',SALAH,'salah'), answered: ()=>!!ANSWERS.salah },
+  { render: renderQ5, answered: ()=>!!ANSWERS.religiosity },
+  { render: c=>renderPillQuestion(c,'q6',MARITAL_PREF,'maritalPref'), answered: ()=>!!ANSWERS.maritalPref },
+  { render: c=>renderPillQuestion(c,'q7',TIMELINE,'timeline'), answered: ()=>!!ANSWERS.timeline }
+];
+
+/* ── Progress dots ── */
+function renderDots(){
+  const wrap = $('qm-dots');
+  wrap.innerHTML = '';
+  for(let i=1;i<=TOTAL_Q;i++){
+    const d = document.createElement('div');
+    d.className = 'qm-dot';
+    if(i < currentQ) d.classList.add('done');
+    else if(i === currentQ) d.classList.add('active');
+    wrap.appendChild(d);
+  }
+}
+
+/* ── Render current question (no animation, used on init) ── */
+function renderCurrentQuestion(){
+  QUESTIONS[currentQ-1].render($('qm-question'));
+  renderDots();
+  $('qm-back').classList.toggle('show', currentQ > 1);
+  $('qm-next').textContent = currentQ === TOTAL_Q ? t('qFindMatches') : t('qNext');
+  $('qm-skip-all').textContent = t('qSkip');
+  $('qm-skip-all').onclick = skipCurrent;
+
+  // "Skip and browse" (bypasses the whole wizard) is only shown on question 1,
+  // per spec section 8, to avoid an awkward mid-flow exit pattern.
+  const skipWizardBtn = $('qm-skip-wizard');
+  skipWizardBtn.classList.toggle('hidden', currentQ !== 1);
+  skipWizardBtn.textContent = t('qSkipWizard');
+  skipWizardBtn.onclick = skipEntireWizard;
+}
+
+function skipEntireWizard(){
+  finishWizard();
+}
+
+/* ── Transition ── */
+function transitionTo(direction, after){
+  const el = $('qm-question');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced){
+    el.style.opacity = 0;
+    setTimeout(()=>{ after(); el.style.opacity = 1; }, 150);
+    return;
+  }
+  el.classList.remove('qm-enter-active');
+  el.classList.add(direction==='forward' ? 'qm-exit-left' : 'qm-exit-right');
+  setTimeout(()=>{
+    after();
+    el.classList.remove('qm-exit-left','qm-exit-right');
+    el.classList.add(direction==='forward' ? 'qm-enter-right-start' : 'qm-enter-left-start');
+    void el.offsetWidth; // force reflow
+    el.classList.remove('qm-enter-right-start','qm-enter-left-start');
+    el.classList.add('qm-enter-active');
+  }, 280);
+}
+
+function goNext(){
+  if(currentQ === TOTAL_Q){ finishWizard(); return; }
+  currentQ++;
+  transitionTo('forward', renderCurrentQuestion);
+}
+function goBack(){
+  if(currentQ === 1) return;
+  currentQ--;
+  transitionTo('back', renderCurrentQuestion);
+}
+function skipCurrent(){ goNext(); }
+
+$('qm-next').addEventListener('click', goNext);
+$('qm-back').addEventListener('click', goBack);
+
+/* ── Final loading + results ── */
+function finishWizard(){
+  saveQuickMatchPreferences();
+  $('qm-card').classList.add('hidden');
+  $('qm-loading-card').classList.remove('hidden');
+  $('qm-loading-text').textContent = t('loading1');
+  const fill = $('qm-loading-fill');
+  fill.style.width = '0%';
+  const displayMs = 1500; // within the 1200-3000ms rule; no real backend call to time against
+  fill.style.transition = `width ${displayMs}ms linear`;
+  requestAnimationFrame(()=>{ fill.style.width = '100%'; });
+  setTimeout(showResults, displayMs);
+}
+
+function showResults(){
+  $('qm-loading-card').classList.add('hidden');
+  $('qm-results-card').classList.remove('hidden');
+  renderResults(false);
+}
+
+const MOCK_RESULTS = [
+  {name:'Aisha M.', meta:'24 · Delhi', detail:'Hanafi · Masters · Hijab'},
+  {name:'Sara K.', meta:'26 · Lucknow', detail:'Hanafi · Bachelor · Hijab'},
+  {name:'Zara A.', meta:'23 · Mumbai', detail:"Shafi'i · Bachelor · Niqab"}
+];
+
+function renderResults(showEmpty){
+  const list = $('qm-results-list');
+  const empty = $('qm-empty-state');
+  const toggleBtn = $('qm-toggle-empty');
+  toggleBtn.textContent = showEmpty ? t('toggleEmptyHide') : t('toggleEmptyShow');
+  toggleBtn.onclick = ()=>renderResults(!showEmpty);
+
+  if(showEmpty){
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  list.innerHTML = MOCK_RESULTS.map(r => `
+    <div class="qm-result-card">
+      <div class="qm-result-top"><strong>${r.name}</strong><span class="meta">${r.meta}</span></div>
+      <span class="qm-badge-good">${t('good')}</span>
+      <div class="qm-result-detail">${r.detail}</div>
+    </div>
+  `).join('');
+}
+
+$('qm-continue-profile').addEventListener('click', ()=>{ window.location.href = 'index.html'; });
+$('qm-browse').addEventListener('click', ()=>{ /* prototype: stays on results, which doubles as the browse view */ });
+
+/* ── quick_match_preferences persistence (draft/preview tier — see spec section 7) ── */
+const QM_KEY = 'quick_match_preferences';
+function saveQuickMatchPreferences(){
+  try { localStorage.setItem(QM_KEY, JSON.stringify(ANSWERS)); } catch(e){ /* ignore in this prototype */ }
+}
+
+/* ── Language toggle ── */
+$('lang-toggle').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-lang]');
+  if(!btn) return;
+  LANG = btn.dataset.lang;
+  document.querySelectorAll('#lang-toggle button').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('[data-t]').forEach(el=>{ const k=el.dataset.t; if(T[k]) el.textContent = T[k][LANG]; });
+  if(!$('qm-card').classList.contains('hidden')) renderCurrentQuestion();
+  if(!$('qm-loading-card').classList.contains('hidden')) $('qm-loading-text').textContent = t('loading1');
+  if(!$('qm-results-card').classList.contains('hidden')) renderResults(!$('qm-empty-state').classList.contains('hidden'));
+});
+
+/* ── Init ── */
+renderCurrentQuestion();
+</script>
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nikah Platform — Profile Form</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green:   #1a7a4a; --green-l: #e6f4ed; --green-m: #2da06a;
+    --amber:   #b45309; --amber-l: #fef3c7;
+    --red:     #b91c1c; --red-l:   #fee2e2;
+    --grey-50: #f9fafb; --grey-100:#f3f4f6; --grey-200:#e5e7eb;
+    --grey-400:#9ca3af; --grey-600:#4b5563; --grey-800:#1f2937;
+    --radius: 10px; --shadow: 0 2px 12px rgba(0,0,0,.10);
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  body { font-family:var(--font); background:var(--grey-50); color:var(--grey-800); min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:0 0 60px; }
+
+  .site-header { width:100%; background:var(--green); color:#fff; padding:14px 16px; position:sticky; top:0; z-index:60; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .site-header .brand h1 { font-size:1.1rem; font-weight:700; }
+  .site-header .brand p { font-size:.72rem; opacity:.85; }
+
+  .lang-toggle { display:flex; background:rgba(255,255,255,.15); border-radius:99px; padding:3px; flex-shrink:0; }
+  .lang-toggle button { border:none; background:transparent; color:#fff; font-size:.8rem; font-weight:600; padding:6px 14px; border-radius:99px; cursor:pointer; font-family:var(--font); transition:background .18s; }
+  .lang-toggle button.active { background:#fff; color:var(--green); }
+
+  .card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); width:100%; max-width:640px; margin:24px 16px 0; padding:28px 28px 32px; }
+
+  .progress-wrap { margin-bottom:18px; }
+  .progress-header { display:flex; justify-content:space-between; font-size:.78rem; color:var(--grey-600); margin-bottom:6px; }
+  .progress-track { height:7px; background:var(--grey-200); border-radius:99px; overflow:hidden; }
+  .progress-fill  { height:100%; background:var(--green-m); border-radius:99px; transition:width .35s ease; }
+
+  .steps { display:flex; gap:6px; align-items:center; margin-bottom:22px; }
+  .step-dot { width:8px; height:8px; border-radius:50%; background:var(--grey-200); flex-shrink:0; }
+  .step-dot.done   { background:var(--green-m); }
+  .step-dot.active { background:var(--green); width:22px; border-radius:4px; }
+  .steps span { font-size:.75rem; color:var(--grey-600); margin-left:4px; }
+
+  .part-header { padding:10px 14px; background:var(--grey-100); border-radius:7px; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+  .part-badge  { background:var(--green); color:#fff; font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:99px; flex-shrink:0; }
+  .part-title  { font-weight:600; font-size:.9rem; }
+  .section-title { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--green); margin:22px 0 10px; }
+  .section-title:first-of-type { margin-top:0; }
+
+  .field { margin-bottom:18px; position:relative; }
+  .field label.flabel { display:block; font-size:.82rem; font-weight:600; color:var(--grey-800); margin-bottom:6px; }
+  .field label.flabel .opt { font-weight:400; color:var(--grey-400); font-size:.75rem; margin-left:4px; }
+  .field label.flabel .req { color:var(--red); margin-left:2px; }
+
+  input[type="text"], input[type="number"], select, textarea {
+    width:100%; padding:9px 12px; border:1.5px solid var(--grey-200);
+    border-radius:7px; font-size:.9rem; font-family:var(--font);
+    color:var(--grey-800); background:#fff; transition:border-color .2s;
+    appearance:none; -webkit-appearance:none;
+  }
+  textarea { resize:vertical; min-height:80px; }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--green-m); box-shadow:0 0 0 3px rgba(45,160,106,.12); }
+  input.error, select.error, textarea.error { border-color:var(--red); }
+  .err-msg { color:var(--red); font-size:.75rem; margin-top:4px; display:none; }
+  .err-msg.show { display:block; }
+
+  .pill-group { display:flex; flex-wrap:wrap; gap:8px; margin-top:2px; }
+  .pill-group label { font-size:.82rem !important; font-weight:400 !important; margin-bottom:0 !important; cursor:pointer; }
+  .pill-group input[type="radio"], .pill-group input[type="checkbox"] { display:none; }
+  .pill-group input + span { display:inline-block; padding:6px 14px; border:1.5px solid var(--grey-200); border-radius:99px; font-size:.82rem; transition:all .18s; user-select:none; }
+  .pill-group input:checked + span { background:var(--green); border-color:var(--green); color:#fff; font-weight:600; }
+
+  .reli-scale { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:4px; }
+  .reli-scale label { cursor:pointer; }
+  .reli-scale input[type="radio"] { display:none; }
+  .reli-scale input + .reli-opt { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px; border:1.5px solid var(--grey-200); border-radius:8px; transition:all .18s; }
+  .reli-scale input:checked + .reli-opt { border-color:var(--green); background:var(--green-l); }
+  .reli-num { font-size:1rem; font-weight:700; color:var(--green); }
+  .reli-lbl { font-size:.62rem; color:var(--grey-600); text-align:center; line-height:1.25; }
+  .reli-desc { font-size:.57rem; color:var(--grey-400); text-align:center; line-height:1.2; }
+
+  .dob-row { display:grid; grid-template-columns:1fr 1.6fr 1.2fr; gap:8px; }
+  .height-row, .range-row { display:flex; gap:10px; align-items:center; }
+  .height-row select, .range-row input, .range-row select { flex:1; }
+  .height-row span, .range-row span { color:var(--grey-600); font-size:.85rem; flex-shrink:0; }
+
+  .autocomplete-wrap { position:relative; }
+  .ac-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid var(--green-m); border-top:none; border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; z-index:50; box-shadow:0 4px 12px rgba(0,0,0,.12); }
+  .ac-item { padding:8px 12px; font-size:.85rem; cursor:pointer; border-bottom:1px solid var(--grey-100); color:var(--grey-800); }
+  .ac-item:last-child { border-bottom:none; }
+  .ac-item:hover, .ac-item.active { background:var(--green-l); color:var(--green); }
+
+  .info-box { padding:12px 14px; border-radius:8px; font-size:.78rem; line-height:1.55; margin-bottom:16px; }
+  .info-box.amber  { background:var(--amber-l); border-left:3px solid var(--amber); color:#78350f; }
+  .info-box.red    { background:var(--red-l);   border-left:3px solid var(--red);    color:#7f1d1d; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:11px 22px; border-radius:8px; font-size:.92rem; font-weight:600; cursor:pointer; border:none; transition:opacity .18s, transform .1s; font-family:var(--font); }
+  .btn:active { transform:scale(.98); }
+  .btn-primary { background:var(--green); color:#fff; }
+  .btn-primary:hover { opacity:.9; }
+  .btn-outline { background:#fff; color:var(--green); border:1.5px solid var(--green); }
+  .btn-outline:hover { background:var(--green-l); }
+  .btn-row { display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; }
+
+  .save-row { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+  .save-status { font-size:.78rem; color:var(--green-m); font-weight:600; }
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--grey-800); color:#fff; padding:11px 20px; border-radius:8px; font-size:.85rem; box-shadow:0 4px 16px rgba(0,0,0,.2); z-index:200; opacity:0; pointer-events:none; transition:opacity .25s; max-width:90vw; text-align:center; }
+  .toast.show { opacity:1; }
+  .btn-row .btn { flex:1; min-width:120px; }
+
+  .hidden { display:none !important; }
+
+  .done-tick { text-align:center; margin-bottom:18px; }
+  .done-tick .tick { width:64px; height:64px; border-radius:50%; background:var(--green); display:inline-flex; align-items:center; justify-content:center; font-size:2rem; color:#fff; margin-bottom:10px; }
+  .done-tick h2 { font-size:1.2rem; font-weight:700; color:var(--green); }
+  .done-tick p  { font-size:.82rem; color:var(--grey-600); margin-top:4px; }
+
+  .summary-grid { border:1.5px solid var(--grey-200); border-radius:8px; overflow:hidden; font-size:.82rem; margin-bottom:20px; display:grid; grid-template-columns:1fr 1.4fr; }
+  .sg-k { font-weight:600; background:var(--grey-50); color:var(--grey-600); border-right:1px solid var(--grey-200); border-bottom:1px solid var(--grey-200); padding:8px 12px; }
+  .sg-v { border-bottom:1px solid var(--grey-200); padding:8px 12px; word-break:break-word; }
+  .sg-section { grid-column:1/-1; background:var(--green); color:#fff; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; padding:6px 12px; }
+
+  /* Info / help tooltip */
+  .info-btn { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:var(--grey-200); color:var(--grey-600); border:none; font-size:.68rem; font-weight:700; cursor:pointer; margin-left:5px; vertical-align:middle; line-height:1; padding:0; }
+  .info-btn:hover, .info-btn.open { background:var(--green-m); color:#fff; }
+  .tooltip-box { margin-top:6px; padding:9px 12px; background:#eef6ff; border-left:3px solid #60a5fa; border-radius:6px; font-size:.76rem; line-height:1.5; color:#1e3a5f; }
+
+  /* Locked pill group (partner gender auto-set) */
+  .pill-group.locked label { pointer-events:none; cursor:not-allowed; }
+  .pill-group.locked input:not(:checked) + span { opacity:.45; }
+  .lock-note { font-size:.74rem; color:var(--grey-600); margin-top:6px; }
+
+
+  @media(max-width:420px) {
+    .card { padding:20px 16px 24px; }
+    .dob-row { grid-template-columns:1fr 1fr; }
+    .dob-row .dob-year { grid-column:1/-1; }
+    .summary-grid { grid-template-columns:1fr; }
+    .sg-k { border-right:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <h1 data-t="brandTitle">Nikah Platform</h1>
+    <p data-t="brandSub">Profile Form</p>
+  </div>
+  <div class="lang-toggle" id="lang-toggle">
+    <button type="button" data-lang="en" class="active">English</button>
+    <button type="button" data-lang="hi">हिंदी</button>
+  </div>
+</header>
+
+<div class="toast" id="toast"></div>
+
+<div class="card" id="form-card">
+  <div class="progress-wrap">
+    <div class="progress-header"><span data-t="progressLabel">Profile completion</span><span id="pct-label">0%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <span id="part-label">Part 1 of 3</span>
+  </div>
+
+  <div class="save-row">
+    <button type="button" class="btn btn-outline btn-sm" id="save-exit-btn"><span data-t="btnSaveExit">💾 Save &amp; continue later</span></button>
+    <span class="save-status hidden" id="save-status"></span>
+  </div>
+
+  <!-- ══ PART 1 — ABOUT YOU ══ -->
+  <section id="part1">
+    <div class="part-header"><span class="part-badge">1</span><span class="part-title" data-t="p1Title">About You</span></div>
+
+    <div class="section-title" data-t="secPersonal">Personal Details</div>
+
+    <div class="field">
+      <label class="flabel" for="f-name"><span data-t="lblName">Full name</span><span class="req">*</span></label>
+      <input type="text" id="f-name" data-t-ph="phName" />
+      <div class="err-msg" id="err-name" data-t="errName">Full name is required.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblRegisterAs">Register as</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-registeras"></div>
+      <div class="err-msg" id="err-registeras" data-t="errRegisterAs">Please select how you are registering.</div>
+    </div>
+
+    <div id="field-walidetails" class="hidden">
+      <div class="field">
+        <label class="flabel" for="f-waliname"><span data-t="lblWaliName">Wali name</span><span class="req">*</span></label>
+        <input type="text" id="f-waliname" data-t-ph="phWaliName" />
+        <div class="err-msg" id="err-waliname" data-t="errWaliName">Please enter your Wali's name.</div>
+      </div>
+      <div class="field">
+        <label class="flabel" for="f-waliphone"><span data-t="lblWaliPhone">Wali phone number</span><span class="req">*</span></label>
+        <input type="text" id="f-waliphone" data-t-ph="phWaliPhone" />
+        <div class="err-msg" id="err-waliphone" data-t="errWaliPhone">Please enter the Wali phone number.</div>
+      </div>
+      <div class="field">
+        <label class="flabel" for="f-walirelation"><span data-t="lblWaliRelation">Relation to the person</span><span class="req">*</span></label>
+        <input type="text" id="f-walirelation" data-t-ph="phWaliRelation" />
+        <div class="err-msg" id="err-walirelation" data-t="errWaliRelation">Please describe the Wali relation.</div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblWaliRelationship">Wali relationship</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipWaliRelationship">?</button></label>
+        <div class="tooltip-box hidden" data-t="tipWaliRelationship">Tip placeholder</div>
+        <div class="pill-group" id="pg-walirelationship"></div>
+        <div class="err-msg" id="err-walirelationship" data-t="errWaliRelationship">Please select Wali's relationship to you.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblDob">Date of birth</span><span class="req">*</span></label>
+      <div class="dob-row">
+        <select id="f-dob-day"></select>
+        <select id="f-dob-month"></select>
+        <select id="f-dob-year" class="dob-year"></select>
+      </div>
+      <div class="err-msg" id="err-dob" data-t="errDob">Please select a valid date of birth (age 18–70).</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblGender">Gender</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-gender"></div>
+      <div class="err-msg" id="err-gender" data-t="errGender">Please select your gender.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblMarital">Marital status</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipMarital">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipMarital">Tip placeholder</div>
+      <div class="pill-group" id="pg-marital"></div>
+      <div class="err-msg" id="err-marital" data-t="errMarital">Please select your marital status.</div>
+    </div>
+
+    <div class="field hidden" id="field-children">
+      <label class="flabel"><span data-t="lblChildren">Do you have children?</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-children"></div>
+      <div class="err-msg" id="err-children" data-t="errChildren">Please answer this question.</div>
+    </div>
+
+    <div id="field-childrendetails" class="hidden">
+      <div class="field">
+        <label class="flabel"><span data-t="lblChildrenCount">How many children do you have?</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <div class="pill-group" id="pg-childrencount"></div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblChildrenCustody">Who do they currently live with?</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipChildrenCustody">?</button></label>
+        <div class="tooltip-box hidden" data-t="tipChildrenCustody">Tip placeholder</div>
+        <div class="pill-group" id="pg-childrencustody"></div>
+      </div>
+      <div class="field">
+        <label class="flabel" for="f-childrendetails"><span data-t="lblChildrenDetails">Anything else you'd like to share about your children</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <textarea id="f-childrendetails" data-t-ph="phChildrenDetails"></textarea>
+      </div>
+    </div>
+
+    <div class="field hidden" id="field-divorcedocs">
+      <label class="flabel"><span data-t="lblDivorceDocs">Do you have your divorce certificate / decree?</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipDivorceDocs">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipDivorceDocs">Tip placeholder</div>
+      <div class="pill-group" id="pg-divorcedocs"></div>
+      <div class="err-msg" id="err-divorcedocs" data-t="errDivorceDocs">Please answer this question.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblHeight">Height</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="height-row">
+        <select id="f-height-ft"></select>
+        <span>/</span>
+        <select id="f-height-cm"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblDisability">Do you have any physical disability or health condition?</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipDisability">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipDisability">Tip placeholder</div>
+      <div class="pill-group" id="pg-disability"></div>
+    </div>
+
+    <div class="field hidden" id="field-disabilitytype">
+      <label class="flabel"><span data-t="lblDisabilityType">Type of disability / condition</span><span class="opt" data-t="optTag">(optional, select all that apply)</span></label>
+      <div class="pill-group" id="pg-disabilitytype"></div>
+    </div>
+
+    <div class="section-title" data-t="secReligious">Religious Identity</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblSect">Sect</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipSect">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipSect">Tip placeholder</div>
+      <div class="pill-group" id="pg-sect"></div>
+      <div class="err-msg" id="err-sect" data-t="errSect">Please select a sect.</div>
+    </div>
+
+    <div class="field hidden" id="field-subsect">
+      <label class="flabel" for="f-subsect"><span data-t="lblSubsect">Sub-sect</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <select id="f-subsect"></select>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblRevert">Did you convert to Islam (revert)?</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipRevert">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipRevert">Tip placeholder</div>
+      <div class="pill-group" id="pg-revert"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblMadhhab">Madhhab (मज़हब / फ़िक़ह)</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipMadhhab">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipMadhhab">Tip placeholder</div>
+      <div class="pill-group" id="pg-madhhab"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblSalah">Salah (नमाज़) frequency</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipSalah">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipSalah">Tip placeholder</div>
+      <div class="pill-group" id="pg-salah"></div>
+      <div class="err-msg" id="err-salah" data-t="errSalah">Please select your salah frequency.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblReligiosity">My religiosity level</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipReligiosity">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipReligiosity">Tip placeholder</div>
+      <div class="reli-scale" id="reli-self"></div>
+    </div>
+
+    <div class="field hidden" id="field-hijab">
+      <label class="flabel"><span data-t="lblHijab">Hijab status</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipHijab">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipHijab">Tip placeholder</div>
+      <div class="pill-group" id="pg-hijab"></div>
+      <div class="err-msg" id="err-hijab" data-t="errHijab">Please select your hijab status.</div>
+    </div>
+
+    <div class="field hidden" id="field-beard">
+      <label class="flabel"><span data-t="lblBeard">Beard status</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-beard"></div>
+      <div class="err-msg" id="err-beard" data-t="errBeard">Please select your beard status.</div>
+    </div>
+
+    <div class="section-title" data-t="secCareer">Career &amp; Education</div>
+
+    <div class="field">
+      <label class="flabel" for="f-profession"><span data-t="lblProfession">Profession</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="autocomplete-wrap">
+        <input type="text" id="f-profession" data-t-ph="phProfession" autocomplete="off" />
+        <div class="ac-dropdown hidden" id="ac-profession"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-income"><span data-t="lblIncome">Monthly income (INR)</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <select id="f-income"></select>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-education"><span data-t="lblEducation">Education level</span><span class="req">*</span></label>
+      <select id="f-education"></select>
+      <div class="err-msg" id="err-education" data-t="errEducation">Please select your education level.</div>
+    </div>
+
+    <div class="section-title" data-t="secLocation">Location</div>
+
+    <div class="field">
+      <label class="flabel" for="f-country"><span data-t="lblCountry">Country of residence</span><span class="req">*</span></label>
+      <select id="f-country"></select>
+      <div class="err-msg" id="err-country" data-t="errCountry">Please select your country of residence.</div>
+    </div>
+
+    <div class="field hidden" id="field-state">
+      <label class="flabel" for="f-state"><span data-t="lblState">State</span><span class="req">*</span></label>
+      <select id="f-state"></select>
+      <div class="err-msg" id="err-state" data-t="errState">Please select your state.</div>
+    </div>
+
+    <div class="field hidden" id="field-city">
+      <label class="flabel" for="f-city"><span data-t="lblCity">City</span><span class="req">*</span></label>
+      <div class="autocomplete-wrap">
+        <input type="text" id="f-city" data-t-ph="phCity" autocomplete="off" />
+        <div class="ac-dropdown hidden" id="ac-city"></div>
+      </div>
+      <div class="err-msg" id="err-city" data-t="errCity">Please enter your city.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-nativeplace"><span data-t="lblNativePlace">Native place / hometown</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipNativePlace">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipNativePlace">Tip placeholder</div>
+      <div class="autocomplete-wrap">
+        <input type="text" id="f-nativeplace" data-t-ph="phNativePlace" autocomplete="off" />
+        <div class="ac-dropdown hidden" id="ac-nativeplace"></div>
+      </div>
+    </div>
+
+    <div class="section-title" data-t="secBackground">Background</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblMotherTongue">Mother tongue / Ethnicity</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-mothertongue"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblLanguages">Languages spoken</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-languages"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblHobbies">Hobbies &amp; interests</span><span class="opt" data-t="optTag">(optional, select all that apply)</span></label>
+      <div class="pill-group" id="pg-hobbies"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-idol"><span data-t="lblIdol">Role model / idol</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <input type="text" id="f-idol" data-t-ph="phIdol" />
+    </div>
+
+    <div class="section-title" data-t="secIntentions">Marriage Intentions</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblTimeline">When are you looking to marry?</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-timeline"></div>
+      <div class="err-msg" id="err-timeline" data-t="errTimeline">Please select a timeline.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblRelocation">Open to relocation with your partner?</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-relocation"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblWantChildren">Do you want children?</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-wantchildren"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblFamilyStructure">Family structure (current home)</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-familystructure"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblWaliInvolved">Is a Wali (वली / अभिभावक) involved?</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipWaliInvolved">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipWaliInvolved">Tip placeholder</div>
+      <div class="pill-group" id="pg-waliinvolved"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblWhoSearching">Who is conducting this search?</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipWhoSearching">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipWhoSearching">Tip placeholder</div>
+      <div class="pill-group" id="pg-whosearching"></div>
+      <div class="err-msg" id="err-whosearching" data-t="errWhoSearching">Please select who is conducting this search.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-aboutme"><span data-t="lblAboutMe">About me</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <textarea id="f-aboutme" data-t-ph="phAboutMe"></textarea>
+    </div>
+
+    <div class="btn-row"><button class="btn btn-primary" id="p1-next" data-t="btnNextP2">Next: Partner sought →</button></div>
+  </section>
+
+  <!-- ══ PART 2 — PARTNER SOUGHT ══ -->
+  <section id="part2" class="hidden">
+    <div class="part-header"><span class="part-badge">2</span><span class="part-title" data-t="p2Title">Partner Sought</span></div>
+
+    <div class="section-title" data-t="secBasicPref">Basic Preferences</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPGender">Preferred partner gender</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-pgender"></div>
+      <div class="lock-note hidden" id="pgender-lock-note" data-t="pgenderLockNote">🔒 Auto-set based on your gender in Part 1 — cannot be changed.</div>
+      <div class="err-msg" id="err-pgender" data-t="errPGender">Please select preferred partner gender.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPAge">Partner age range</span><span class="req">*</span></label>
+      <div class="range-row">
+        <input type="number" id="f-page-min" min="18" max="70" data-t-ph="phMin" />
+        <span data-t="rangeTo">to</span>
+        <input type="number" id="f-page-max" min="18" max="70" data-t-ph="phMax" />
+      </div>
+      <div class="err-msg" id="err-page" data-t="errPAge">Please enter a valid age range (18–70, max ≥ min).</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPHeight">Preferred height range</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="range-row">
+        <select id="f-pheight-min"></select>
+        <span data-t="rangeTo">to</span>
+        <select id="f-pheight-max"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPSect">Preferred sect</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipPSect">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipPSect">Tip placeholder</div>
+      <div class="pill-group" id="pg-psect"></div>
+      <div class="err-msg" id="err-psect" data-t="errPSect">Please select preferred sect.</div>
+    </div>
+
+    <div class="field hidden" id="field-psubsect">
+      <label class="flabel" for="f-psubsect"><span data-t="lblPSubsect">Preferred sub-sect</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <select id="f-psubsect"></select>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPMadhhab">Preferred Madhhab (मज़हब / फ़िक़ह)</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipPMadhhab">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipPMadhhab">Tip placeholder</div>
+      <div class="pill-group" id="pg-pmadhhab"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPSalah">Preferred Salah (नमाज़) frequency</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-psalah"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPReligiosity">Preferred religiosity level</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="reli-scale" id="reli-partner"></div>
+    </div>
+
+    <div class="field hidden" id="field-phijab">
+      <label class="flabel"><span data-t="lblPHijab">Hijab preference</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipPHijab">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipPHijab">Tip placeholder</div>
+      <div class="pill-group" id="pg-phijab"></div>
+    </div>
+
+    <div class="field hidden" id="field-pbeard">
+      <label class="flabel"><span data-t="lblPBeard">Beard preference</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-pbeard"></div>
+    </div>
+
+    <div class="section-title" data-t="secHistory">History &amp; Background</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPMarital">Preferred marital status</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-pmarital"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPChildren">Acceptable if partner has children?</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-pchildren"></div>
+    </div>
+
+    <div class="section-title" data-t="secCareer">Career &amp; Education</div>
+
+    <div class="field">
+      <label class="flabel" for="f-pprofession"><span data-t="lblPProfession">Preferred profession</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="autocomplete-wrap">
+        <input type="text" id="f-pprofession" data-t-ph="phProfession" autocomplete="off" />
+        <div class="ac-dropdown hidden" id="ac-pprofession"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPEmployment">Employment preference</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-pemployment"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-peducation"><span data-t="lblPEducation">Preferred education level</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <select id="f-peducation"></select>
+    </div>
+
+    <div class="section-title" data-t="secLocationLiving">Location &amp; Living</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPRegion">Preferred region</span><span class="req">*</span></label>
+      <div class="pill-group" style="margin-bottom:10px">
+        <label><input type="checkbox" id="f-pregion-any" /><span data-t="optAnyRegion">Open to any region</span></label>
+      </div>
+      <div id="pregion-selects">
+        <select id="f-pregion-country" style="margin-bottom:8px"></select>
+        <input type="text" id="f-pregion-city" data-t-ph="phCity" />
+      </div>
+      <div class="err-msg" id="err-pregion" data-t="errPRegion">Please select a preferred region or tick "Open to any region."</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPRelocate">Should partner be willing to relocate?</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-prelocate"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblLivingArrangement">Living arrangement after marriage</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-livingarrangement"></div>
+      <div class="err-msg" id="err-livingarrangement" data-t="errLivingArrangement">Please select a living arrangement.</div>
+    </div>
+
+    <div class="section-title" data-t="secFuturePlans">Future Plans</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPWantChildren">Children preference</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-pwantchildren"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPTimeline">Preferred Nikah (निकाह) timeline</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-ptimeline"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPMotherTongue">Mother tongue preference</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-pmothertongue"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblPWali">Wali (वली) involvement expected from partner?</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipPWali">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipPWali">Tip placeholder</div>
+      <div class="pill-group" id="pg-pwali"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-pexpectations"><span data-t="lblPExpectations">Any other expectations</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <textarea id="f-pexpectations" data-t-ph="phExpectations"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" id="p2-back" data-t="btnBack">← Back</button>
+      <button class="btn btn-primary" id="p2-next" data-t="btnNextP3">Next: Religious preferences →</button>
+    </div>
+  </section>
+
+  <!-- ══ PART 3 — RELIGIOUS PREFERENCES ══ -->
+  <section id="part3" class="hidden">
+    <div class="part-header"><span class="part-badge">3</span><span class="part-title" data-t="p3Title">Religious Preferences</span></div>
+
+    <div class="section-title" data-t="secPracticeBeliefs">Section A — Practice &amp; Beliefs</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblHifz">Quran memorisation (Hifz)</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipHifz">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipHifz">Tip placeholder</div>
+      <div class="pill-group" id="pg-hifz"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblQuranReading">Quran reading habit</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-quranreading"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblIslamicEducation">Islamic education level</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipIslamicEducation">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipIslamicEducation">Tip placeholder</div>
+      <div class="pill-group" id="pg-islamiceducation"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblLifestyleGoals">Islamic lifestyle goals</span><span class="opt" data-t="optTag">(optional, select all that apply)</span></label>
+      <div class="pill-group" id="pg-lifestylegoals"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblStudyIslam">Interested in studying Islam further?</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-studyislam"></div>
+    </div>
+
+    <div class="section-title" data-t="secLifestyleBoundaries">Section B — Lifestyle &amp; Boundaries</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblHalalDiet">Halal diet adherence</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-halaldiet"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblFasting">Fasting habit</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-fasting"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblZakat">Zakat / Sadaqah practice</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-zakat"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblSmoking">Smoking status</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-smoking"></div>
+      <div class="err-msg" id="err-smoking" data-t="errSmoking">Please select your smoking status.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblAlcohol">Alcohol consumption</span><span class="req">*</span></label>
+      <div class="pill-group" id="pg-alcohol"></div>
+      <div class="err-msg" id="err-alcohol" data-t="errAlcohol">Please select your alcohol consumption.</div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblHalalEntertainment">Halal entertainment standards</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipHalalEntertainment">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipHalalEntertainment">Tip placeholder</div>
+      <div class="pill-group" id="pg-halalentertainment"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblMixedGender">Mixed gender interaction comfort</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipMixedGender">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipMixedGender">Tip placeholder</div>
+      <div class="pill-group" id="pg-mixedgender"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblMusic">Music / Nasheed views</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-music"></div>
+    </div>
+
+    <div class="section-title" data-t="secMarriageExpectations">Section C — Marriage-specific Expectations</div>
+
+    <div id="male-only-fields" class="hidden">
+      <div class="field">
+        <label class="flabel"><span data-t="lblNafaqah">Financial readiness for Nikah (निकाह) (Nafaqah)</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipNafaqah">?</button></label>
+        <div class="tooltip-box hidden" data-t="tipNafaqah">Tip placeholder</div>
+        <div class="pill-group" id="pg-nafaqah"></div>
+        <div class="err-msg" id="err-nafaqah" data-t="errNafaqah">Please select your financial readiness.</div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblWifeWorking">Attitude toward wife working</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <div class="pill-group" id="pg-wifeworking"></div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblMahram">Guardian of wife's travel (mahram)</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <div class="pill-group" id="pg-mahram"></div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblHousing">Housing status</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <div class="pill-group" id="pg-housing"></div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblMahrOffer">Mahr (मेहर) offering capacity</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipMahr">?</button></label>
+        <div class="tooltip-box hidden" data-t="tipMahr">Tip placeholder</div>
+        <div class="pill-group" id="pg-mahroffer"></div>
+      </div>
+    </div>
+
+    <div id="female-only-fields" class="hidden">
+      <div class="field">
+        <label class="flabel"><span data-t="lblCareerAfterMarriage">Career plans after marriage</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <div class="pill-group" id="pg-careerafter"></div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblProposalContact">Proposal contact preference</span><span class="req">*</span><button type="button" class="info-btn" data-tip="tipProposalContact">?</button></label>
+        <div class="tooltip-box hidden" data-t="tipProposalContact">Tip placeholder</div>
+        <div class="pill-group" id="pg-proposalcontact"></div>
+        <div class="err-msg" id="err-proposalcontact" data-t="errProposalContact">Please select a proposal contact preference.</div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblMahrExpectation">Mahr (मेहर) expectation</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipMahr">?</button></label>
+        <div class="tooltip-box hidden" data-t="tipMahr">Tip placeholder</div>
+        <div class="pill-group" id="pg-mahrexpectation"></div>
+      </div>
+    </div>
+
+    <div class="section-title" data-t="secShared">Section C (continued) — Shared</div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblWaliDisplayToggle">Would you like to display Wali (वली / guardian) details on your profile?</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipWaliDisplayToggle">?</button></label>
+      <div class="tooltip-box hidden" data-t="tipWaliDisplayToggle">Tip placeholder</div>
+      <div class="pill-group" id="pg-walidisplaytoggle"></div>
+    </div>
+
+    <div id="field-walidisplaydetails" class="hidden">
+      <div class="field">
+        <label class="flabel" for="f-walidisplayname"><span data-t="lblWaliDisplayName">Wali's name</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <input type="text" id="f-walidisplayname" data-t-ph="phWaliDisplayName" />
+      </div>
+      <div class="field">
+        <label class="flabel" for="f-walidisplayphone"><span data-t="lblWaliDisplayPhone">Wali's phone number</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <input type="text" id="f-walidisplayphone" data-t-ph="phWaliDisplayPhone" />
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblWaliDisplayRelationship">Wali's relationship to you</span><span class="opt" data-t="optTag">(optional)</span></label>
+        <div class="pill-group" id="pg-walidisplayrelationship"></div>
+      </div>
+      <div class="field">
+        <label class="flabel"><span data-t="lblWaliShowContact">Would you also like to show this contact number on your profile?</span><span class="opt" data-t="optTag">(optional)</span><button type="button" class="info-btn" data-tip="tipWaliShowContact">?</button></label>
+        <div class="tooltip-box hidden" data-t="tipWaliShowContact">Tip placeholder</div>
+        <div class="pill-group" id="pg-walishowcontact"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblWeddingType">Wedding type preference</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-weddingtype"></div>
+    </div>
+
+    <div class="field hidden" id="field-weddingrituals">
+      <label class="flabel"><span data-t="lblWeddingRituals">Which functions/rituals would you like to have?</span><span class="opt" data-t="optTag">(optional, select all that apply)</span></label>
+      <div class="pill-group" id="pg-weddingrituals"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel"><span data-t="lblParentingStyle">Islamic parenting style preference</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <div class="pill-group" id="pg-parentingstyle"></div>
+    </div>
+
+    <div class="field">
+      <label class="flabel" for="f-deen"><span data-t="lblDeen">Anything else about your deen</span><span class="opt" data-t="optTag">(optional)</span></label>
+      <textarea id="f-deen" data-t-ph="phDeen"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" id="p3-back" data-t="btnBack">← Back</button>
+      <button class="btn btn-primary" id="p3-submit" data-t="btnSubmit">Submit profile →</button>
+    </div>
+  </section>
+</div>
+
+<div class="card hidden" id="done-card">
+  <div class="done-tick">
+    <div class="tick">✓</div>
+    <h2 data-t="doneTitle">Profile submitted successfully!</h2>
+    <p data-t="doneSub">This is a demo — no real data has been stored or transmitted.</p>
+  </div>
+  <div class="summary-grid" id="summary-grid"></div>
+  <button class="btn btn-outline" style="width:100%" id="restart-btn" data-t="btnRestart">Start over</button>
+</div>
+
+<script src="form.js"></script>
+</body>
+</html>

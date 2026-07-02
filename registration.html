@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Nikah Platform — Register</title>
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --green:      #1a6e3c;
+      --green-l:    #f0f7f0;
+      --green-b:    #e8f0e9;
+      --text:       #111827;
+      --sub:        #6b7280;
+      --error:      #dc2626;
+      --white:      #ffffff;
+      --r-input:    8px;
+      --r-card:     12px;
+      --r-btn:      10px;
+      --h-input:    48px;
+      --font:       -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    /* Phone-like shell */
+    .shell {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Screens ── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: var(--white);
+      will-change: transform, opacity;
+    }
+
+    /* transition helpers applied by JS */
+    .screen { transition: transform 280ms ease-out, opacity 280ms ease-out; }
+    @media (prefers-reduced-motion: reduce) {
+      .screen { transition: opacity 150ms ease !important; transform: none !important; }
+    }
+
+    /* ── Back button ── */
+    .back-btn {
+      background: none; border: none;
+      font-size: 1.5rem; color: var(--text);
+      cursor: pointer; padding: 20px 22px 0;
+      line-height: 1; align-self: flex-start;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { color: var(--green); }
+
+    /* ── Body area (scrollable content) ── */
+    .sbody {
+      padding: 10px 28px 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Footer (sticky at bottom) ── */
+    .sfooter { padding: 12px 28px 36px; flex-shrink: 0; }
+
+    /* ── Typography ── */
+    .screen-title   { font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 22px; }
+    .field-label    { font-size: .86rem; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+    .error-msg      { font-size: .8rem; color: var(--error); margin-top: 5px; min-height: 1.15em; }
+
+    /* ── Inputs ── */
+    .text-input {
+      width: 100%; height: var(--h-input);
+      border: 1.5px solid #d1d5db; border-radius: var(--r-input);
+      padding: 0 14px; font-size: .97rem; color: var(--text);
+      font-family: var(--font); outline: none;
+      transition: border-color .15s;
+    }
+    .text-input:focus { border-color: var(--green); }
+    .text-input.has-error { border-color: var(--error); }
+
+    /* ── Buttons ── */
+    .btn {
+      width: 100%; height: var(--h-input);
+      background: var(--green); color: var(--white);
+      border: none; border-radius: var(--r-btn);
+      font-size: 1rem; font-weight: 600; font-family: var(--font);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: opacity .15s;
+    }
+    .btn:hover:not(:disabled) { opacity: .88; }
+    .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    /* ════════════════════════════════
+       SCREEN 1 — Landing
+    ════════════════════════════════ */
+    #s1 { padding: 52px 32px 44px; justify-content: center; }
+
+    .brand { text-align: center; margin-bottom: 36px; }
+    .brand-icon { font-size: 3.4rem; line-height: 1; }
+    .brand-name { font-size: 1.75rem; font-weight: 800; color: var(--green); margin-top: 10px; letter-spacing: -.5px; }
+    .brand-tagline { font-size: .93rem; color: var(--sub); margin-top: 8px; font-style: italic; }
+
+    .trust-list { list-style: none; margin-bottom: 28px; }
+    .trust-list li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: .93rem; color: var(--text); padding: 5px 0;
+    }
+    .trust-list li::before { content: '✅'; font-size: .9rem; }
+
+    .divider { border: none; border-top: 1px solid #e5e7eb; margin: 22px 0; }
+
+    .testimonial {
+      background: var(--green-l); border-left: 3px solid var(--green);
+      border-radius: var(--r-card); padding: 14px 16px;
+      margin-bottom: 28px; font-size: .88rem; color: var(--text);
+      font-style: italic; line-height: 1.6; min-height: 90px;
+      transition: opacity .4s;
+    }
+    .testimonial cite {
+      display: block; font-style: normal;
+      color: var(--sub); margin-top: 6px; font-size: .8rem;
+    }
+
+    .signin-link { text-align: center; margin-top: 14px; font-size: .88rem; color: var(--sub); }
+    .signin-link a { color: var(--green); font-weight: 600; text-decoration: none; cursor: pointer; }
+    .signin-link a:hover { text-decoration: underline; }
+
+    /* ════════════════════════════════
+       SCREEN 2 — Phone / Email
+    ════════════════════════════════ */
+    .phone-row { display: flex; gap: 8px; }
+
+    .cc-select {
+      height: var(--h-input); border: 1.5px solid #d1d5db; border-radius: var(--r-input);
+      padding: 0 8px; font-size: .88rem; color: var(--text); background: var(--white);
+      font-family: var(--font); outline: none; cursor: pointer; min-width: 100px;
+      transition: border-color .15s; flex-shrink: 0;
+    }
+    .cc-select:focus { border-color: var(--green); }
+
+    .or-row {
+      display: flex; align-items: center; gap: 12px; margin: 18px 0;
+    }
+    .or-row::before, .or-row::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+    .or-row span { font-size: .82rem; color: var(--sub); }
+
+    .privacy-note {
+      font-size: .78rem; color: var(--sub); text-align: center;
+      line-height: 1.55; margin-bottom: 14px;
+    }
+    .privacy-note a { color: var(--green); text-decoration: none; }
+    .privacy-note a:hover { text-decoration: underline; }
+
+    /* ════════════════════════════════
+       SCREEN 3 — OTP
+    ════════════════════════════════ */
+    .otp-dest { font-size: .93rem; color: var(--sub); line-height: 1.6; margin-bottom: 26px; }
+    .otp-dest strong { color: var(--text); }
+
+    .demo-badge {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--r-input);
+      padding: 9px 14px; font-size: .8rem; color: #92400e;
+      text-align: center; margin-bottom: 18px;
+    }
+
+    .otp-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; margin-bottom: 14px; }
+
+    .otp-box {
+      width: 100%; min-width: 0;
+      height: 54px; border: 1.5px solid #d1d5db; border-radius: var(--r-input);
+      text-align: center; font-size: 1.4rem; font-weight: 700; color: var(--text);
+      font-family: var(--font); outline: none; caret-color: var(--green);
+      transition: border-color .15s, background .15s;
+    }
+    .otp-box:focus       { border-color: var(--green); background: var(--green-l); }
+    .otp-box.filled      { border-color: var(--green); }
+    .otp-box.otp-err     { border-color: var(--error); background: #fef2f2; animation: shake .3s ease; }
+
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+    .resend-row { text-align: center; font-size: .87rem; color: var(--sub); margin: 14px 0 18px; }
+    .resend-link { color: var(--green); font-weight: 600; cursor: pointer; }
+    .resend-link:hover { text-decoration: underline; }
+    .resend-link.off { color: var(--sub); cursor: default; pointer-events: none; }
+
+    .lockout-box {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--r-input);
+      padding: 13px; font-size: .85rem; color: var(--error);
+      text-align: center; margin-bottom: 14px; display: none;
+    }
+
+    .wrong-link {
+      display: block; text-align: center; font-size: .85rem;
+      color: var(--sub); margin-top: 14px; cursor: pointer;
+    }
+    .wrong-link:hover { color: var(--green); }
+
+    /* ════════════════════════════════
+       SCREEN 4 — Name & gender
+    ════════════════════════════════ */
+    .sub-q { font-size: .96rem; color: var(--sub); margin-bottom: 10px; }
+    .gender-q { font-size: 1rem; color: var(--text); font-weight: 500; margin: 24px 0 12px; }
+
+    .gender-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .gender-card {
+      min-height: 130px; border: 2px solid #d1d5db; border-radius: var(--r-card);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 7px; padding: 18px 10px; text-align: center; cursor: pointer;
+      transition: border-color .18s, background .18s; user-select: none;
+    }
+    .gender-card:hover { border-color: var(--green); background: var(--green-l); }
+    .gender-card.sel   { border-color: var(--green); background: var(--green-l); }
+
+    .gc-icon  { font-size: 2.2rem; line-height: 1; }
+    .gc-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .gc-sub   { font-size: .72rem; color: var(--sub); line-height: 1.35; }
+    .gender-card.sel .gc-title { color: var(--green); }
+
+    /* ════════════════════════════════
+       SCREEN 5 — Welcome
+    ════════════════════════════════ */
+    #s5 {
+      background: var(--green);
+      align-items: center; justify-content: center;
+      text-align: center; padding: 56px 36px;
+    }
+
+    .wm-wrap {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: .08; pointer-events: none;
+    }
+    .wm-wrap svg { width: 300px; height: 300px; }
+
+    .w-icon    { font-size: 3.8rem; margin-bottom: 28px; position: relative; z-index: 1; }
+    .w-title   { font-size: 1.65rem; font-weight: 700; color: var(--white); position: relative; z-index: 1; }
+    .w-name    { font-size: 1.65rem; font-weight: 700; color: var(--white); margin-top: 4px; position: relative; z-index: 1; }
+    .w-dua     { font-size: .97rem; color: rgba(255,255,255,.85); margin-top: 22px; line-height: 1.75; max-width: 290px; position: relative; z-index: 1; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══════════════ S1 — Landing ══════════════ -->
+  <div class="screen" id="s1">
+
+    <div class="brand">
+      <div class="brand-name">Nikah Platform</div>
+      <div class="brand-tagline">"Your Nikah begins with sincerity"</div>
+    </div>
+
+    <ul class="trust-list">
+      <li>Verified profiles</li>
+      <li>Privacy first</li>
+      <li>Islamic guidance</li>
+    </ul>
+
+    <hr class="divider">
+
+    <div class="testimonial" id="tbox">
+      <span id="tquote"></span>
+      <cite id="tcite"></cite>
+    </div>
+
+    <hr class="divider">
+
+    <button class="btn" id="btn-getstarted" onclick="go(2,'up')">Get started →</button>
+
+    <div class="signin-link">
+      Already have an account? <a onclick="startSignIn()">Sign in</a>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ S2 — Phone / Email ══════════════ -->
+  <div class="screen" id="s2" style="transform:translateX(100%);opacity:0;pointer-events:none">
+    <button class="back-btn" onclick="go(1,'back-up')">←</button>
+    <div class="sbody">
+      <div class="screen-title" id="s2-title">Create your account</div>
+
+      <div class="field-label">Phone number</div>
+      <div class="phone-row">
+        <select class="cc-select" id="cc">
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+971">🇦🇪 +971</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+1">🇨🇦 +1</option>
+          <option value="+61">🇦🇺 +61</option>
+          <option value="+966">🇸🇦 +966</option>
+          <option value="+974">🇶🇦 +974</option>
+          <option value="+60">🇲🇾 +60</option>
+          <option value="+92">🇵🇰 +92</option>
+          <option value="+880">🇧🇩 +880</option>
+        </select>
+        <input type="tel" class="text-input" id="phone" placeholder="98765 43210" oninput="onContact()">
+      </div>
+      <div class="error-msg" id="ph-err"></div>
+
+      <div class="or-row"><span>or</span></div>
+
+      <div class="field-label">Email address</div>
+      <input type="email" class="text-input" id="email" placeholder="your@email.com" oninput="onContact()">
+      <div class="error-msg" id="em-err"></div>
+    </div>
+
+    <div class="sfooter">
+      <p class="privacy-note">
+        By continuing you agree to our
+        <a href="#" onclick="return false">Privacy Policy</a> and
+        <a href="#" onclick="return false">Islamic Principles</a>
+      </p>
+      <br>
+      <button class="btn" id="btn-continue" disabled onclick="submitContact()">Continue →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ S3 — OTP ══════════════ -->
+  <div class="screen" id="s3" style="transform:translateX(100%);opacity:0;pointer-events:none">
+    <button class="back-btn" onclick="go(2,'back')">←</button>
+    <div class="sbody">
+      <div class="screen-title">Verify your number</div>
+      <div class="otp-dest">We sent a 6-digit code to <strong id="otp-to"></strong></div>
+
+      <div class="demo-badge">🔧 Demo mode — enter <strong>1 2 3 4 5 6</strong> to continue</div>
+
+      <div class="lockout-box" id="lockout"></div>
+
+      <div class="otp-grid">
+        <input class="otp-box" id="o0" maxlength="1" inputmode="numeric">
+        <input class="otp-box" id="o1" maxlength="1" inputmode="numeric">
+        <input class="otp-box" id="o2" maxlength="1" inputmode="numeric">
+        <input class="otp-box" id="o3" maxlength="1" inputmode="numeric">
+        <input class="otp-box" id="o4" maxlength="1" inputmode="numeric">
+        <input class="otp-box" id="o5" maxlength="1" inputmode="numeric">
+      </div>
+      <div class="error-msg" id="otp-err" style="text-align:center"></div>
+
+      <div class="resend-row" id="resend-row">
+        <span id="resend-pre">Resend code in </span><span id="resend-cd">45s</span>
+        <span class="resend-link off" id="resend-link" onclick="resendOTP()">Resend code</span>
+      </div>
+
+      <button class="btn" id="btn-verify" disabled onclick="verifyOTP()">Verify →</button>
+      <a class="wrong-link" onclick="go(2,'back')">Wrong number? Go back</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ S4 — Name & gender ══════════════ -->
+  <div class="screen" id="s4" style="transform:translateX(100%);opacity:0;pointer-events:none">
+    <button class="back-btn" onclick="backFrom4()">←</button>
+    <div class="sbody">
+      <div class="screen-title">Almost there</div>
+      <div class="sub-q">What should we call you?</div>
+      <input type="text" class="text-input" id="uname" placeholder="Your first name" maxlength="30" oninput="onName()">
+      <div class="error-msg" id="name-err"></div>
+
+      <div class="gender-q">I am</div>
+      <div class="gender-cards">
+        <div class="gender-card" id="gc-bride" onclick="pickGender('male')">
+          <div class="gc-icon">👰</div>
+          <div class="gc-title">Looking for a wife</div>
+        </div>
+        <div class="gender-card" id="gc-groom" onclick="pickGender('female')">
+          <div class="gc-icon">🤵</div>
+          <div class="gc-title">Looking for a husband</div>
+        </div>
+      </div>
+      <div class="error-msg" id="gender-err"></div>
+    </div>
+
+    <div class="sfooter">
+      <button class="btn" id="btn-begin" disabled onclick="submitProfile()">Let's begin →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ S5 — Welcome ══════════════ -->
+  <div class="screen" id="s5" style="transform:none;opacity:0;pointer-events:none">
+    <!-- Arabic calligraphy watermark -->
+    <div class="wm-wrap">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="white">
+        <text x="100" y="80" text-anchor="middle" font-size="22" font-family="serif">بِسْمِ اللَّهِ</text>
+        <text x="100" y="115" text-anchor="middle" font-size="18" font-family="serif">الرَّحْمٰنِ الرَّحِيمِ</text>
+      </svg>
+    </div>
+    <div class="w-title" id="w-title">Bismillah.</div>
+    <div class="w-name" id="w-name">Welcome to Nikah Platform,<br><span id="w-fname"></span>.</div>
+    <div class="w-dua" id="w-dua">May Allah make this journey easy and blessed for you.</div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+/* ── State ── */
+const S = { phone:'', email:'', cc:'+91', name:'', gender:'', isSignIn:false, attempts:0, locked:false };
+
+/* ── Testimonials ── */
+const TESTIMONIALS = [
+  { q:'Alhamdulillah we found each other through this platform. May Allah bless every couple here.', c:'— Anonymous couple, Lucknow' },
+  { q:'I was hesitant at first, but this platform gave me a halal, respectful way to find my husband.', c:'— Anonymous sister, Hyderabad' },
+  { q:'The whole process felt guided by Islamic values. We got engaged within two months.', c:'— Anonymous couple, Dubai' }
+];
+let tIdx = 0;
+function setTestimonial(i){
+  document.getElementById('tquote').textContent = TESTIMONIALS[i].q + ' ';
+  document.getElementById('tcite').textContent  = TESTIMONIALS[i].c;
+}
+setTestimonial(0);
+setInterval(()=>{
+  const box = document.getElementById('tbox');
+  box.style.opacity = 0;
+  setTimeout(()=>{ tIdx = (tIdx+1)%TESTIMONIALS.length; setTestimonial(tIdx); box.style.opacity=1; }, 420);
+}, 5000);
+
+/* ── Transitions ── */
+let cur = 1;
+
+function go(to, dir){
+  const FROM = document.getElementById('s'+cur);
+  const TO   = document.getElementById('s'+to);
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  FROM.style.pointerEvents = 'none';
+
+  if(reduced){
+    FROM.style.transition = 'opacity 150ms ease';
+    TO.style.transition   = 'opacity 150ms ease';
+    FROM.style.opacity = '0';
+    TO.style.transform = 'none';
+    TO.style.opacity = '0';
+    requestAnimationFrame(()=>{ TO.style.opacity = '1'; });
+    TO.style.pointerEvents = 'all';
+    cur = to; return;
+  }
+
+  const dur = dir==='fade' ? '350ms ease-in-out' : '280ms ease-out';
+  FROM.style.transition = `transform ${dur}, opacity ${dur}`;
+  TO.style.transition   = `transform ${dur}, opacity ${dur}`;
+
+  if(dir==='up'){
+    TO.style.transform = 'translateY(100%)'; TO.style.opacity='0';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      TO.style.transform='translateY(0)'; TO.style.opacity='1';
+      FROM.style.transform='translateY(-30px)'; FROM.style.opacity='0';
+    }));
+  } else if(dir==='back-up'){
+    TO.style.transform='translateY(-30px)'; TO.style.opacity='0';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      TO.style.transform='translateY(0)'; TO.style.opacity='1';
+      FROM.style.transform='translateY(100%)'; FROM.style.opacity='0';
+    }));
+  } else if(dir==='left'){
+    TO.style.transform='translateX(100%)'; TO.style.opacity='0';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      TO.style.transform='translateX(0)'; TO.style.opacity='1';
+      FROM.style.transform='translateX(-100%)'; FROM.style.opacity='0';
+    }));
+  } else if(dir==='back'){
+    TO.style.transform='translateX(-100%)'; TO.style.opacity='0';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      TO.style.transform='translateX(0)'; TO.style.opacity='1';
+      FROM.style.transform='translateX(100%)'; FROM.style.opacity='0';
+    }));
+  } else if(dir==='fade'){
+    TO.style.transform='none'; TO.style.opacity='0';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      TO.style.opacity='1';
+      FROM.style.opacity='0';
+    }));
+  }
+
+  TO.style.pointerEvents = 'all';
+  cur = to;
+}
+
+/* ── Sign in ── */
+function startSignIn(){
+  S.isSignIn = true;
+  document.getElementById('s2-title').textContent = 'Sign in';
+  go(2,'up');
+}
+
+/* ── Screen 2: contact input ── */
+function onContact(){
+  const ph = document.getElementById('phone').value.trim();
+  const em = document.getElementById('email').value.trim();
+  const phOk = ph.replace(/\D/g,'').length >= 10;
+  const emOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+  document.getElementById('btn-continue').disabled = !(phOk || emOk);
+}
+
+function submitContact(){
+  const ph = document.getElementById('phone').value.trim();
+  const em = document.getElementById('email').value.trim();
+  const cc = document.getElementById('cc').value;
+  document.getElementById('ph-err').textContent='';
+  document.getElementById('em-err').textContent='';
+
+  const phOk = ph.replace(/\D/g,'').length >= 10;
+  const emOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+
+  if(!phOk && ph) document.getElementById('ph-err').textContent='Enter a valid phone number (min 10 digits).';
+  if(!emOk && em) document.getElementById('em-err').textContent='Enter a valid email address.';
+  if(!phOk && !emOk) return;
+
+  S.phone=ph; S.email=em; S.cc=cc;
+
+  /* Masked destination display */
+  const dest = phOk ? maskPhone(cc, ph) : em;
+  document.getElementById('otp-to').textContent = dest;
+
+  /* Reset OTP state */
+  S.attempts=0; S.locked=false;
+  clearOTP();
+  document.getElementById('otp-err').textContent='';
+  document.getElementById('lockout').style.display='none';
+  document.getElementById('btn-verify').disabled=true;
+  startResend();
+
+  go(3,'left');
+}
+
+function maskPhone(cc, num){
+  const d = num.replace(/\D/g,'');
+  const hidden = d.slice(0,-4).replace(/\d/g,'X') + d.slice(-4);
+  return cc + ' ' + hidden;
+}
+
+/* ── Screen 3: OTP ── */
+const boxes = ()=> Array.from({length:6},(_,i)=>document.getElementById('o'+i));
+
+function clearOTP(){
+  boxes().forEach(b=>{ b.value=''; b.disabled=false; b.classList.remove('filled','otp-err'); });
+}
+
+/* Wire up OTP boxes */
+(function initOTP(){
+  const bs = boxes();
+  bs.forEach((b,i)=>{
+    b.addEventListener('input', e=>{
+      const v = e.target.value.replace(/\D/g,'');
+      b.value = v.slice(-1);
+      b.classList.toggle('filled', !!b.value);
+      if(b.value && i<5) bs[i+1].focus();
+      checkFull();
+    });
+    b.addEventListener('keydown', e=>{
+      if(e.key==='Backspace' && !b.value && i>0){ bs[i-1].focus(); }
+    });
+    b.addEventListener('paste', e=>{
+      e.preventDefault();
+      const text = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');
+      bs.forEach((x,j)=>{ x.value=text[j]||''; x.classList.toggle('filled',!!x.value); });
+      const last = Math.min(text.length,6)-1;
+      if(last>=0) bs[last].focus();
+      checkFull();
+    });
+  });
+})();
+
+function checkFull(){
+  const full = boxes().every(b=>b.value);
+  document.getElementById('btn-verify').disabled = !full;
+  if(full) setTimeout(verifyOTP, 80);
+}
+
+let resendInterval=null;
+function startResend(){
+  let s=45;
+  const cd=document.getElementById('resend-cd');
+  const pre=document.getElementById('resend-pre');
+  const link=document.getElementById('resend-link');
+  cd.textContent='45s'; cd.style.display=''; pre.style.display='';
+  link.classList.add('off'); link.style.display='none';
+  if(resendInterval) clearInterval(resendInterval);
+  resendInterval = setInterval(()=>{
+    s--;
+    cd.textContent=s+'s';
+    if(s<=0){
+      clearInterval(resendInterval);
+      cd.style.display='none'; pre.style.display='none';
+      link.style.display='inline'; link.classList.remove('off');
+    }
+  },1000);
+}
+
+function resendOTP(){
+  clearOTP();
+  document.getElementById('otp-err').textContent='';
+  startResend();
+  boxes()[0].focus();
+}
+
+let lockInterval=null;
+function verifyOTP(){
+  if(S.locked) return;
+  const code = boxes().map(b=>b.value).join('');
+  if(code.length<6) return;
+
+  if(code==='123456'){
+    /* ✅ correct */
+    setTimeout(()=>{
+      if(S.isSignIn){
+        /* Sign-in: go directly to wizard */
+        window.location.href='quick-match-wizard.html';
+      } else {
+        go(4,'left');
+        setTimeout(()=>document.getElementById('uname').focus(), 350);
+      }
+    }, 180);
+  } else {
+    /* ❌ wrong */
+    S.attempts++;
+    const bs = boxes();
+    bs.forEach(b=>{ b.classList.add('otp-err'); b.classList.remove('filled'); });
+    setTimeout(()=>bs.forEach(b=>b.classList.remove('otp-err')), 450);
+
+    if(S.attempts>=3){
+      S.locked=true;
+      bs.forEach(b=>b.disabled=true);
+      document.getElementById('btn-verify').disabled=true;
+      document.getElementById('otp-err').textContent='';
+      const lockEl=document.getElementById('lockout');
+      lockEl.style.display='block';
+      const end=Date.now()+30*60*1000;
+      function tick(){
+        const rem=Math.ceil((end-Date.now())/1000);
+        if(rem<=0){
+          clearInterval(lockInterval); lockEl.style.display='none';
+          bs.forEach(b=>{ b.disabled=false; b.value=''; });
+          S.locked=false; S.attempts=0; return;
+        }
+        const m=Math.floor(rem/60), s=rem%60;
+        lockEl.textContent=`Too many attempts. Please wait ${m}:${String(s).padStart(2,'0')} before trying again.`;
+      }
+      tick(); lockInterval=setInterval(tick,1000);
+    } else {
+      const rem=3-S.attempts;
+      document.getElementById('otp-err').textContent=`Incorrect code. ${rem} attempt${rem===1?'':'s'} remaining.`;
+      clearOTP(); boxes()[0].focus();
+    }
+  }
+}
+
+/* ── Screen 4: name & gender ── */
+let chosenGender = '';
+
+function pickGender(g){
+  chosenGender = g;
+  document.getElementById('gc-bride').classList.toggle('sel', g==='male');
+  document.getElementById('gc-groom').classList.toggle('sel', g==='female');
+  document.getElementById('gender-err').textContent='';
+  checkBegin();
+}
+
+function onName(){
+  document.getElementById('name-err').textContent='';
+  checkBegin();
+}
+
+function checkBegin(){
+  const n=document.getElementById('uname').value.trim();
+  document.getElementById('btn-begin').disabled=!(n.length>=2 && chosenGender);
+}
+
+function backFrom4(){
+  if(confirm('Going back requires re-verification. Continue?')) go(3,'back');
+}
+
+function submitProfile(){
+  const n=document.getElementById('uname').value.trim();
+  if(n.length<2){ document.getElementById('name-err').textContent='Please enter your name.'; return; }
+  if(!chosenGender){ document.getElementById('gender-err').textContent='Please select who you are looking for.'; return; }
+
+  S.name=n; S.gender=chosenGender;
+  try{ localStorage.setItem('nikah_reg', JSON.stringify({displayName:n, gender:chosenGender})); }catch(e){}
+
+  buildWelcome(n);
+  go(5,'fade');
+  setTimeout(()=>{ window.location.href='quick-match-wizard.html'; }, 3000);
+}
+
+/* ── Screen 5: welcome ── */
+function buildWelcome(name){
+  const today=new Date(), m=today.getMonth(), d=today.getDate();
+  let dua='May Allah make this journey easy and blessed for you.';
+  /* Approximate dates for Eid/Ramadan 2026 */
+  const isEid = (m===2&&d===30)||(m===5&&d===7);
+  const isRamadanStart = m===2&&d===1;
+  if(isEid)         dua=`Eid Mubarak! May this celebration bring you closer to your Nikah.`;
+  if(isRamadanStart) dua=`Ramadan Mubarak! May this blessed month bring you your righteous match.`;
+  document.getElementById('w-fname').textContent = name;
+  document.getElementById('w-dua').textContent   = dua;
+}
+
+/* Init: make S1 visible */
+const s1=document.getElementById('s1');
+s1.style.transform='translateX(0)'; s1.style.opacity='1'; s1.style.pointerEvents='all';
+</script>
+</body>
+</html>
