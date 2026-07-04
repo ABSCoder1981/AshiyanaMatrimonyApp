@@ -1,0 +1,894 @@
+1. System Context Diagram (Use Case Diagram)
+@startuml Matrimonial_System_Context
+left to right direction
+actor "Bride" as B
+actor "Groom" as G
+actor "Wali (Guardian)" as W
+actor "Parent" as P
+actor "Admin" as A
+actor "Moderator" as M
+
+rectangle "Matrimonial Platform" {
+  usecase "Register" as UC1
+  usecase "Login" as UC2
+  usecase "Complete Profile" as UC3
+  usecase "Save Draft Profile" as UC4
+  usecase "Upload Photos" as UC5
+  usecase "Search Matches" as UC6
+  usecase "View Profiles" as UC7
+  usecase "Express Interest" as UC8
+  usecase "Manage Privacy Settings" as UC9
+  usecase "Receive Notifications" as UC10
+  usecase "Manage Bride/Groom Profile" as UC11
+  usecase "Approve Communication" as UC12
+  usecase "Accept/Reject Proposals" as UC13
+  usecase "View Suggested Matches" as UC14
+  usecase "Manage Candidate Profile" as UC15
+  usecase "Participate in Communication" as UC16
+  usecase "Verify User Profiles" as UC17
+  usecase "Approve/Reject Verification" as UC18
+  usecase "Manage Users" as UC19
+  usecase "Suspend/Activate Accounts" as UC20
+  usecase "Manage Subscription Plans" as UC21
+  usecase "View Reports" as UC22
+  usecase "Audit System Activities" as UC23
+  usecase "Review Reported Profiles" as UC24
+  usecase "Moderate Messages" as UC25
+  usecase "Review Abuse Reports" as UC26
+  usecase "Escalate Cases" as UC27
+}
+
+' Primary Users
+B --> UC1
+B --> UC2
+B --> UC3
+B --> UC4
+B --> UC5
+B --> UC6
+B --> UC7
+B --> UC8
+B --> UC9
+B --> UC10
+
+G --> UC1
+G --> UC2
+G --> UC3
+G --> UC4
+G --> UC5
+G --> UC6
+G --> UC7
+G --> UC8
+G --> UC9
+G --> UC10
+
+W --> UC1
+W --> UC2
+W --> UC11
+W --> UC12
+W --> UC13
+W --> UC14
+
+P --> UC1
+P --> UC2
+P --> UC15
+P --> UC14
+P --> UC16
+
+' Internal Users
+A --> UC17
+A --> UC18
+A --> UC19
+A --> UC20
+A --> UC21
+A --> UC22
+A --> UC23
+
+M --> UC24
+M --> UC25
+M --> UC26
+M --> UC27
+
+@enduml
+----------------------------------------
+CLASS Diagram
+
+@startuml Core_Entities
+class User {
+  +UserId: UUID
+  +Email: String
+  +MobileNumber: String
+  +PasswordHash: String
+  +Status: UserStatus
+  +EmailVerified: Boolean
+  +MobileVerified: Boolean
+  +FailedLoginAttempts: Integer
+  +LastLogin: DateTime
+  +CreatedAt: DateTime
+  +UpdatedAt: DateTime
+  --
+  +register()
+  +login()
+  +resetPassword()
+  +verifyOTP()
+  +updateStatus()
+}
+
+class Profile {
+  +ProfileId: UUID
+  +UserId: UUID
+  +FirstName: String
+  +LastName: String
+  +Gender: Gender
+  +DateOfBirth: Date
+  +Height: Float
+  +MaritalStatus: MaritalStatus
+  +Religion: String
+  +Sect: String
+  +PrayerLevel: PrayerLevel
+  +MotherTongue: String
+  +Occupation: String
+  +Education: String
+  +Income: BigDecimal
+  +Country: String
+  +State: String
+  +City: String
+  +Bio: Text
+  +VisibilityStatus: VisibilityStatus
+  +CreatedAt: DateTime
+  +UpdatedAt: DateTime
+  --
+  +createProfile()
+  +updateProfile()
+  +calculateCompleteness()
+  +updateVisibility()
+}
+
+class Session {
+  +SessionId: UUID
+  +UserId: UUID
+  +Token: String
+  +IpAddress: String
+  +UserAgent: String
+  +ExpiresAt: DateTime
+  +CreatedAt: DateTime
+  --
+  +createSession()
+  +validateSession()
+  +terminateSession()
+}
+
+class OTP {
+  +OtpId: UUID
+  +UserId: UUID
+  +OtpCode: String
+  +OtpType: OtpType
+  +ExpiresAt: DateTime
+  +IsUsed: Boolean
+  +CreatedAt: DateTime
+  --
+  +generateOTP()
+  +verifyOTP()
+  +resendOTP()
+}
+
+class LoginLog {
+  +LoginLogId: UUID
+  +UserId: UUID
+  +LoginTime: DateTime
+  +IpAddress: String
+  +UserAgent: String
+  +LoginStatus: LoginStatus
+  +FailureReason: String
+  --
+  +logLoginAttempt()
+  +getUserLoginHistory()
+}
+
+' Relationships
+User "1" -- "1" Profile
+User "1" -- "0..*" Session
+User "1" -- "0..*" OTP
+User "1" -- "0..*" LoginLog
+
+@enduml
+--------------------------------------------------
+Profile Related Entities
+@startuml Profile_Entities
+class Profile {
+  +ProfileId: UUID
+  +UserId: UUID
+  +FirstName: String
+  +LastName: String
+  +Gender: Gender
+  +DateOfBirth: Date
+  +Height: Float
+  +MaritalStatus: MaritalStatus
+  +Religion: String
+  +Sect: String
+  +PrayerLevel: PrayerLevel
+  +MotherTongue: String
+  +Occupation: String
+  +Education: String
+  +Income: BigDecimal
+  +Country: String
+  +State: String
+  +City: String
+  +Bio: Text
+  +VisibilityStatus: VisibilityStatus
+  +CreatedAt: DateTime
+  +UpdatedAt: DateTime
+}
+
+class Education {
+  +EducationId: UUID
+  +ProfileId: UUID
+  +Degree: String
+  +Institution: String
+  +FieldOfStudy: String
+  +StartYear: Integer
+  +EndYear: Integer
+  +IsCompleted: Boolean
+  --
+  +addEducation()
+  +updateEducation()
+  +deleteEducation()
+}
+
+class Occupation {
+  +OccupationId: UUID
+  +ProfileId: UUID
+  +JobTitle: String
+  +Company: String
+  +Industry: String
+  +StartDate: Date
+  +EndDate: Date
+  +IsCurrent: Boolean
+  --
+  +addOccupation()
+  +updateOccupation()
+  +deleteOccupation()
+}
+
+class Address {
+  +AddressId: UUID
+  +ProfileId: UUID
+  +AddressType: AddressType
+  +Street: String
+  +City: String
+  +State: String
+  +Country: String
+  +PostalCode: String
+  +IsPrimary: Boolean
+  --
+  +addAddress()
+  +updateAddress()
+  +setPrimaryAddress()
+}
+
+class PrivacySetting {
+  +PrivacySettingId: UUID
+  +ProfileId: UUID
+  +PhotoVisibility: VisibilityLevel
+  +ContactVisibility: VisibilityLevel
+  +ProfileVisibility: VisibilityLevel
+  +WaliVisibility: VisibilityLevel
+  +SearchVisibility: Boolean
+  +ShowIncome: Boolean
+  +ShowOccupation: Boolean
+  +UpdatedAt: DateTime
+  --
+  +updatePrivacy()
+  +getVisibilityForUser()
+}
+
+class PartnerPreference {
+  +PreferenceId: UUID
+  +ProfileId: UUID
+  +PreferredAgeMin: Integer
+  +PreferredAgeMax: Integer
+  +PreferredHeightMin: Float
+  +PreferredHeightMax: Float
+  +PreferredCity: String
+  +PreferredEducation: String
+  +PreferredOccupation: String
+  +PreferredSect: String
+  +PreferredPrayerLevel: PrayerLevel
+  +PreferredMaritalStatus: MaritalStatus
+  --
+  +updatePreferences()
+  +getMatchingProfiles()
+}
+
+' Relationships
+Profile "1" -- "0..*" Education
+Profile "1" -- "0..*" Occupation
+Profile "1" -- "0..*" Address
+Profile "1" -- "1" PrivacySetting
+Profile "1" -- "1" PartnerPreference
+
+@enduml
+-----------------------------------------
+Verification & Subscription Entities
+@startuml Verification_Subscription
+class VerificationRequest {
+  +VerificationRequestId: UUID
+  +ProfileId: UUID
+  +VerificationType: VerificationType
+  +Status: VerificationStatus
+  +SubmittedAt: DateTime
+  +ReviewedAt: DateTime
+  +ReviewerId: UUID
+  +Remarks: String
+  +TrustScore: Integer
+  --
+  +submitVerification()
+  +reviewVerification()
+  +updateTrustScore()
+  +getVerificationHistory()
+}
+
+class Subscription {
+  +SubscriptionId: UUID
+  +ProfileId: UUID
+  +PlanId: UUID
+  +Status: SubscriptionStatus
+  +StartDate: DateTime
+  +EndDate: DateTime
+  +AutoRenew: Boolean
+  +CreatedAt: DateTime
+  --
+  +activateSubscription()
+  +cancelSubscription()
+  +renewSubscription()
+  +checkExpiry()
+}
+
+class SubscriptionPlan {
+  +PlanId: UUID
+  +PlanName: String
+  +Description: String
+  +Price: BigDecimal
+  +Currency: String
+  +Duration: Integer
+  +Features: List<String>
+  +IsActive: Boolean
+  +CreatedAt: DateTime
+  --
+  +createPlan()
+  +updatePlan()
+  +getActivePlans()
+}
+
+class Payment {
+  +PaymentId: UUID
+  +SubscriptionId: UUID
+  +Gateway: PaymentGateway
+  +GatewayTransactionId: String
+  +Amount: BigDecimal
+  +Currency: String
+  +Status: PaymentStatus
+  +PaidAt: DateTime
+  --
+  +processPayment()
+  +refundPayment()
+  +getPaymentStatus()
+}
+
+' Relationships
+Profile "1" -- "0..*" VerificationRequest
+Profile "1" -- "0..*" Subscription
+SubscriptionPlan "1" -- "0..*" Subscription
+Subscription "1" -- "0..*" Payment
+
+@enduml
+-----------------------------------------
+Messaging Entities
+@startuml Messaging_Entities
+class Conversation {
+  +ConversationId: UUID
+  +InitiatorProfileId: UUID
+  +ReceiverProfileId: UUID
+  +GuardianApprovalStatus: ApprovalStatus
+  +Status: ConversationStatus
+  +CreatedAt: DateTime
+  +ApprovalId: UUID
+  +ApprovedBy: UUID
+  +ApprovedAt: DateTime
+  --
+  +startConversation()
+  +approveConversation()
+  +blockConversation()
+  +getMessages()
+}
+
+class Message {
+  +MessageId: UUID
+  +ConversationId: UUID
+  +SenderProfileId: UUID
+  +Content: Text
+  +MessageType: MessageType
+  +SentAt: DateTime
+  +ReadAt: DateTime
+  +ApprovalStatus: ApprovalStatus
+  --
+  +sendMessage()
+  +markAsRead()
+  +deleteMessage()
+  +reportMessage()
+}
+
+class Attachment {
+  +AttachmentId: UUID
+  +MessageId: UUID
+  +StorageKey: String
+  +FileName: String
+  +FileSize: Long
+  +MimeType: String
+  +UploadedAt: DateTime
+  --
+  +uploadAttachment()
+  +deleteAttachment()
+}
+
+class Guardian {
+  +GuardianId: UUID
+  +UserId: UUID
+  +Name: String
+  +Relationship: RelationshipType
+  +Mobile: String
+  +Email: String
+  +Status: GuardianStatus
+  +CreatedAt: DateTime
+  --
+  +approveCommunication()
+  +rejectProposal()
+  +viewMessages()
+  +blockUser()
+}
+
+' Relationships
+Profile "1" -- "0..*" Conversation (initiator)
+Profile "1" -- "0..*" Conversation (receiver)
+Conversation "1" -- "0..*" Message
+Message "1" -- "0..*" Attachment
+Profile "1" -- "1" Guardian
+
+@enduml
+-----------------------------
+Photo & Media Entities
+@startuml Media_Entities
+class Photo {
+  +PhotoId: UUID
+  +ProfileId: UUID
+  +StorageKey: String
+  +ThumbnailKey: String
+  +Visibility: VisibilityLevel
+  +ModerationStatus: ModerationStatus
+  +UploadedAt: DateTime
+  --
+  +uploadPhoto()
+  +deletePhoto()
+  +updateVisibility()
+  +generateSignedUrl()
+}
+
+class MatchCandidate {
+  +MatchId: UUID
+  +ProfileId: UUID
+  +MatchedProfileId: UUID
+  +Score: Float
+  +Status: MatchStatus
+  +CreatedAt: DateTime
+  +ViewedAt: DateTime
+  --
+  +calculateMatchScore()
+  +acceptMatch()
+  +rejectMatch()
+  +viewMatch()
+}
+
+' Relationships
+Profile "1" -- "0..*" Photo
+Profile "1" -- "0..*" MatchCandidate (Profile)
+Profile "1" -- "0..*" MatchCandidate (Matched Profile)
+
+@enduml
+-------------------------------
+Admin & Audit Entities
+@startuml Admin_Audit
+class Admin {
+  +AdminId: UUID
+  +UserId: UUID
+  +Role: AdminRole
+  +Permissions: List<String>
+  +LastActive: DateTime
+  +CreatedAt: DateTime
+  --
+  +assignRole()
+  +revokePermissions()
+  +viewReports()
+  +auditActivities()
+}
+
+class Moderator {
+  +ModeratorId: UUID
+  +UserId: UUID
+  +Specialization: String
+  +CasesResolved: Integer
+  +Rating: Float
+  +Status: ModeratorStatus
+  --
+  +reviewProfile()
+  +moderateMessage()
+  +handleReport()
+  +escalateCase()
+}
+
+class Report {
+  +ReportId: UUID
+  +ReportedBy: UUID
+  +ReportedProfileId: UUID
+  +ReportType: ReportType
+  +Description: Text
+  +Status: ReportStatus
+  +CreatedAt: DateTime
+  +ResolvedAt: DateTime
+  +Resolution: String
+  --
+  +submitReport()
+  +reviewReport()
+  +resolveReport()
+  +escalateReport()
+}
+
+class ActivityLog {
+  +LogId: UUID
+  +UserId: UUID
+  +Action: String
+  +Resource: String
+  +IpAddress: String
+  +UserAgent: String
+  +Timestamp: DateTime
+  +Details: JSON
+  --
+  +logActivity()
+  +getUserActivities()
+  +getAdminActivities()
+}
+
+class SecurityEvent {
+  +EventId: UUID
+  +EventType: SecurityEventType
+  +Severity: SeverityLevel
+  +Description: String
+  +IpAddress: String
+  +UserId: UUID
+  +Timestamp: DateTime
+  +IsResolved: Boolean
+  --
+  +logSecurityEvent()
+  +resolveEvent()
+  +getSecurityReport()
+}
+
+' Relationships
+User "1" -- "0..1" Admin
+User "1" -- "0..1" Moderator
+Admin "1" -- "0..*" Report
+Moderator "1" -- "0..*" Report
+User "1" -- "0..*" ActivityLog
+User "1" -- "0..*" SecurityEvent
+
+@enduml
+-------------------------
+High-Level Conceptual ER Diagram
+@startuml ER_Diagram
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b><u>x</u></b>
+
+table(User) {
+  <b><u>UserId</u></b>
+  Email
+  MobileNumber
+  PasswordHash
+  Status
+  CreatedAt
+  UpdatedAt
+}
+
+table(Profile) {
+  <b><u>ProfileId</u></b>
+  *UserId
+  FirstName
+  LastName
+  Gender
+  DateOfBirth
+  Religion
+  Income
+  VisibilityStatus
+}
+
+table(Session) {
+  <b><u>SessionId</u></b>
+  *UserId
+  Token
+  ExpiresAt
+}
+
+table(OTP) {
+  <b><u>OtpId</u></b>
+  *UserId
+  OtpCode
+  ExpiresAt
+  IsUsed
+}
+
+table(LoginLog) {
+  <b><u>LoginLogId</u></b>
+  *UserId
+  LoginTime
+  IpAddress
+  LoginStatus
+}
+
+table(Photo) {
+  <b><u>PhotoId</u></b>
+  *ProfileId
+  StorageKey
+  Visibility
+  ModerationStatus
+}
+
+table(VerificationRequest) {
+  <b><u>VerificationRequestId</u></b>
+  *ProfileId
+  VerificationType
+  Status
+  TrustScore
+}
+
+table(Subscription) {
+  <b><u>SubscriptionId</u></b>
+  *ProfileId
+  *PlanId
+  Status
+  StartDate
+  EndDate
+}
+
+table(SubscriptionPlan) {
+  <b><u>PlanId</u></b>
+  PlanName
+  Price
+  Duration
+}
+
+table(Payment) {
+  <b><u>PaymentId</u></b>
+  *SubscriptionId
+  GatewayTransactionId
+  Amount
+  Status
+}
+
+table(Conversation) {
+  <b><u>ConversationId</u></b>
+  *InitiatorProfileId
+  *ReceiverProfileId
+  GuardianApprovalStatus
+  Status
+}
+
+table(Message) {
+  <b><u>MessageId</u></b>
+  *ConversationId
+  *SenderProfileId
+  Content
+  SentAt
+  ReadAt
+}
+
+table(Attachment) {
+  <b><u>AttachmentId</u></b>
+  *MessageId
+  StorageKey
+  FileName
+}
+
+table(PartnerPreference) {
+  <b><u>PreferenceId</u></b>
+  *ProfileId
+  PreferredAgeMin
+  PreferredAgeMax
+  PreferredCity
+}
+
+table(MatchCandidate) {
+  <b><u>MatchId</u></b>
+  *ProfileId
+  *MatchedProfileId
+  Score
+  Status
+}
+
+table(PrivacySetting) {
+  <b><u>PrivacySettingId</u></b>
+  *ProfileId
+  PhotoVisibility
+  ContactVisibility
+  ProfileVisibility
+}
+
+table(Education) {
+  <b><u>EducationId</u></b>
+  *ProfileId
+  Degree
+  Institution
+}
+
+table(Occupation) {
+  <b><u>OccupationId</u></b>
+  *ProfileId
+  JobTitle
+  Company
+}
+
+table(Address) {
+  <b><u>AddressId</u></b>
+  *ProfileId
+  City
+  State
+  Country
+}
+
+table(Guardian) {
+  <b><u>GuardianId</u></b>
+  *UserId
+  Name
+  Relationship
+}
+
+' Relationships
+User ||--|| Profile : "has"
+User ||--o{ Session : "has"
+User ||--o{ OTP : "has"
+User ||--o{ LoginLog : "has"
+User ||--o| Guardian : "is"
+Profile ||--o{ Photo : "has"
+Profile ||--o{ VerificationRequest : "has"
+Profile ||--o{ Subscription : "has"
+SubscriptionPlan ||--o{ Subscription : "defines"
+Subscription ||--o{ Payment : "has"
+Profile ||--o{ Conversation : "initiates"
+Profile ||--o{ Conversation : "receives"
+Conversation ||--o{ Message : "contains"
+Message ||--o{ Attachment : "has"
+Profile ||--|| PartnerPreference : "has"
+Profile ||--o{ MatchCandidate : "matches"
+Profile ||--|| PrivacySetting : "has"
+Profile ||--o{ Education : "has"
+Profile ||--o{ Occupation : "has"
+Profile ||--o{ Address : "has"
+
+@enduml
+-----------------------------
+Component Diagram
+@startuml Components
+!define COMPONENT class
+
+package "Presentation Layer" {
+  [Web UI] as WebUI
+  [Mobile App] as MobileApp
+  [Admin Dashboard] as AdminUI
+}
+
+package "API Gateway" {
+  [REST API] as RestAPI
+  [WebSocket] as WSServer
+  [Rate Limiter] as RateLimiter
+  [Authentication Filter] as AuthFilter
+}
+
+package "Application Layer" {
+  package "Core Modules" {
+    [Authentication] as Auth
+    [User Profile] as ProfileModule
+    [Verification] as Verification
+    [Matching] as Matching
+    [Search] as Search
+    [Messaging] as Messaging
+    [Subscription] as Subscription
+    [Notification] as Notification
+    [Privacy] as Privacy
+    [Media] as Media
+    [Reporting] as Reporting
+    [Administration] as AdminModule
+    [Audit] as AuditModule
+  }
+}
+
+package "Data Layer" {
+  [Database] as DB
+  [Cache] as Cache
+  [Elasticsearch] as ES
+  [Object Storage] as Storage
+}
+
+package "External Systems" {
+  [Payment Gateway] as Payment
+  [SMS Provider] as SMS
+  [Email Provider] as Email
+  [Push Notification] as Push
+  [Identity Verification] as IdentityVerify
+}
+
+' Connections
+WebUI -- RestAPI
+MobileApp -- RestAPI
+MobileApp -- WSServer
+AdminUI -- RestAPI
+
+RestAPI -- RateLimiter
+RestAPI -- AuthFilter
+
+AuthFilter -- Auth
+
+Auth -- DB
+ProfileModule -- DB
+Verification -- DB
+Matching -- DB
+Search -- ES
+Messaging -- DB
+Messaging -- WSServer
+Subscription -- DB
+Notification -- DB
+Privacy -- DB
+Media -- Storage
+Reporting -- DB
+AdminModule -- DB
+Audit -- DB
+
+Auth -- Cache
+ProfileModule -- Cache
+Verification -- Cache
+
+Subscription -- Payment
+Notification -- SMS
+Notification -- Email
+Notification -- Push
+Verification -- IdentityVerify
+
+@enduml
+-----------------------------------
+ Sequence Diagrams
+ User Registration Sequence
+ 
+ @startuml Registration_Sequence
+actor User as U
+participant "Web UI" as UI
+participant "API Gateway" as API
+participant "Authentication" as Auth
+participant "Database" as DB
+participant "Notification" as Notif
+participant "SMS/Email" as SME
+
+U -> UI: Enter Registration Details
+UI -> API: POST /register
+API -> Auth: processRegistration()
+Auth -> DB: checkEmailExists()
+DB --> Auth: returns false
+Auth -> DB: checkMobileExists()
+DB --> Auth: returns false
+Auth -> Auth: hashPassword()
+Auth -> DB: createUser()
+DB --> Auth: UserCreated
+Auth -> Notif: sendOTP()
+Notif -> SME: sendSMS/Email
+SME --> Notif: Sent
+Notif --> Auth: OTP Sent
+Auth --> API: RegistrationSuccess
+API --> UI: 201 Created
+UI --> U: Display OTP Verification
+
+@enduml
+-----------------------------
