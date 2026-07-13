@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nikah Platform — Screen Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF7F0;
+    --panel:#FFFFFF;
+    --ink:#22271F;
+    --ink-soft:#5B6156;
+    --line2:#E3DCCB;
+    --teal:#1F5C52;
+    --teal-ink:#0E332E;
+    --gold:#C08A34;
+    --gold-ink:#5A3E15;
+    --sage:#7C9885;
+    --rose:#A6555B;
+    --rose-ink:#4A2226;
+    --card-radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+  }
+  .star-pattern{
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.05;
+    background-image:
+      radial-gradient(circle at 20px 20px, transparent 8px, var(--teal) 8.5px, transparent 9px),
+      radial-gradient(circle at 60px 60px, transparent 8px, var(--teal) 8.5px, transparent 9px);
+    background-size:80px 80px;
+  }
+  .shell{position:relative; z-index:1; display:flex; max-width:1280px; margin:0 auto;}
+
+  nav.side{
+    width:260px; flex-shrink:0; position:sticky; top:0; align-self:flex-start;
+    height:100vh; overflow-y:auto; padding:36px 20px 40px 32px;
+    border-right:1px solid var(--line2);
+  }
+  .brand{font-family:'Fraunces',serif; font-size:22px; font-weight:600; color:var(--teal-ink); margin:0 0 2px;}
+  .brand-sub{font-size:12px; color:var(--ink-soft); margin-bottom:28px; letter-spacing:0.02em;}
+  .side ol{list-style:none; margin:0; padding:0; counter-reset:phase;}
+  .side li{margin-bottom:2px;}
+  .side a{
+    counter-increment:phase;
+    display:flex; gap:10px; align-items:baseline;
+    text-decoration:none; color:var(--ink-soft); font-size:13.5px;
+    padding:7px 10px; border-radius:8px; transition:background .15s,color .15s;
+  }
+  .side a:before{
+    content:counter(phase,decimal-leading-zero);
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--gold-ink); opacity:0.75;
+  }
+  .side a:hover, .side a.active{ background:#F0EADA; color:var(--ink); }
+
+  main{flex:1; min-width:0; padding:48px 56px 120px;}
+  header.hero{margin-bottom:44px; max-width:760px;}
+  header.hero .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--gold-ink);
+    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;
+  }
+  header.hero h1{
+    font-family:'Fraunces',serif; font-weight:600; font-size:clamp(32px,4vw,46px);
+    color:var(--teal-ink); margin:0 0 14px; line-height:1.1;
+  }
+  header.hero p{color:var(--ink-soft); font-size:16px; max-width:620px; margin:0;}
+
+  .filterbar{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:40px;
+    padding:14px; background:var(--panel); border:1px solid var(--line2); border-radius:12px;
+  }
+  .filterbar span.label{font-size:12px; color:var(--ink-soft); align-self:center; margin-right:4px;}
+  .chip{
+    font-size:13px; padding:7px 14px; border-radius:999px; border:1px solid var(--line2);
+    background:transparent; color:var(--ink); cursor:pointer; font-family:'Inter',sans-serif;
+    transition:all .15s;
+  }
+  .chip:hover{border-color:var(--teal);}
+  .chip.active{background:var(--teal); border-color:var(--teal); color:#fff;}
+
+  section.phase{margin-bottom:56px; scroll-margin-top:24px;}
+  .phase-head{display:flex; align-items:baseline; gap:14px; margin-bottom:22px;}
+  .phase-num{
+    font-family:'Fraunces',serif; font-size:34px; font-weight:600; color:var(--gold);
+    line-height:1;
+  }
+  .phase-head h2{
+    font-family:'Fraunces',serif; font-size:24px; font-weight:600; color:var(--teal-ink); margin:0;
+  }
+
+  .track{position:relative; padding-left:28px; border-left:2px solid var(--line2);}
+  .card{
+    position:relative; background:var(--panel); border:1px solid var(--line2);
+    border-radius:var(--card-radius); padding:22px 24px; margin-bottom:16px;
+  }
+  .card:before{
+    content:''; position:absolute; left:-34px; top:26px; width:10px; height:10px;
+    border-radius:50%; background:var(--teal); border:2px solid var(--bg);
+  }
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:10px;}
+  .card-title{display:flex; align-items:baseline; gap:10px;}
+  .screen-num{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft);}
+  .card h3{font-family:'Fraunces',serif; font-size:19px; font-weight:600; margin:0; color:var(--ink);}
+  .roles{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+  .tag{
+    font-size:10.5px; padding:3px 9px; border-radius:999px; font-weight:500;
+    white-space:nowrap; letter-spacing:0.01em;
+  }
+  .tag.candidate{background:#E7F0E4; color:#3B5A38;}
+  .tag.wali-proxy{background:#E4EEEC; color:var(--teal-ink);}
+  .tag.wali-display{background:#F4E9DD; color:var(--gold-ink);}
+  .tag.admin{background:#F2E3E4; color:var(--rose-ink);}
+
+  .purpose{color:var(--ink-soft); font-size:14.5px; margin:0 0 14px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:12px;}
+  .block h4{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--sage);
+    margin:0 0 6px; font-weight:600;
+  }
+  .block p, .block ul{font-size:13.5px; margin:0; color:var(--ink);}
+  .block ul{padding-left:18px;}
+  .rule{
+    font-size:13px; background:#FBF3E3; border-left:3px solid var(--gold); padding:9px 12px;
+    border-radius:0 8px 8px 0; margin-top:10px; color:var(--gold-ink);
+  }
+  .next{
+    font-size:12.5px; color:var(--teal-ink); margin-top:12px; padding-top:12px;
+    border-top:1px dashed var(--line2);
+  }
+  .next b{font-weight:600;}
+  .empty-note{ font-size:13.5px; color:var(--ink-soft); font-style:italic; padding:20px 0; }
+
+  @media (max-width:900px){
+    nav.side{display:none;}
+    main{padding:32px 20px 100px;}
+    .grid2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="star-pattern"></div>
+<div class="shell">
+  <nav class="side" id="sideNav"></nav>
+  <main>
+    <header class="hero">
+      <div class="eyebrow">Companion to the Complete Design Document v1.0</div>
+      <h1>Screen-by-screen user flow</h1>
+      <p>Landing → OTP → role choice → the Quick-Match teaser → the full profile form → review → optional selfie verification → into Search, Matching and Guardian-gated messaging.</p>
+    </header>
+
+    <div class="filterbar" id="filterBar">
+      <span class="label">Show screens for:</span>
+    </div>
+
+    <div id="phases"></div>
+  </main>
+</div>
+
+<script>
+const ROLES = [
+  {key:'all', label:'All roles'},
+  {key:'candidate', label:'Candidate'},
+  {key:'wali-proxy', label:'Wali — Proxy'},
+  {key:'wali-display', label:'Wali — Display-only'},
+  {key:'admin', label:'Admin / Moderator'},
+];
+
+const DATA = [
+{phase:"Landing & authentication", screens:[
+  {n:1, title:"Splash / landing", roles:['candidate','wali-proxy'],
+   purpose:"First touch — introduces the platform before any account exists.",
+   elements:["Tagline: \"Your Nikah begins with sincerity\"","\"Get started\" CTA","\"Log in\" link"],
+   functionality:"No account or session required yet.",
+   next:"Phone / email entry"},
+  {n:2, title:"Phone / email entry", roles:['candidate','wali-proxy'],
+   purpose:"Collects the identifier the OTP will be sent to.",
+   elements:["Phone or email input","\"Send code\" button"],
+   functionality:"Public, rate-limited endpoint. Triggers POST /auth/otp/request.",
+   next:"OTP verification"},
+  {n:3, title:"OTP verification", roles:['candidate','wali-proxy'],
+   purpose:"Confirms identity via a one-time code before any account exists.",
+   elements:["6-digit code input","Resend timer","\"Verify\" button"],
+   functionality:"Code is single-use and expires. A LoginLog row is written on every attempt, success or failure. On success, creates the User + Session.",
+   next:"\"Who are you registering as?\""},
+  {n:4, title:"\"Who are you registering as?\"", roles:['candidate','wali-proxy'],
+   purpose:"The account exists — now it decides what kind of account it is.",
+   elements:["\"Myself\" — I'm the one looking to get married","\"On behalf of a family member\" — I'm a Wali registering for someone else","If Wali: the candidate's first name + your relation to her"],
+   functionality:"Myself → this account owns the Profile directly. Wali → this account is immediately set as the Guardian, ControlLevel = Proxy, VerificationLevel = Verified (since he already holds a phone-verified account). A Wali who lists himself as display-only only (no login, no control) is instead added later, from inside Part 1 of the form.",
+   next:"Quick-match preview"},
+]},
+{phase:"Quick-match teaser", screens:[
+  {n:5, title:"Quick-match preview", roles:['candidate','wali-proxy'],
+   purpose:"Sets expectations before the wizard — \"answer a few quick questions and preview matches right now.\"",
+   elements:["Short explainer copy","Sample match card as a teaser","\"Start\" CTA","\"Skip, I'll fill the full form\" link"],
+   functionality:"Purely a framing screen — nothing is saved here yet.",
+   next:"Quick-match wizard, or straight to the full form"},
+  {n:6, title:"Quick-match wizard (8 steps, EN/HI)", roles:['candidate','wali-proxy'],
+   purpose:"A fast, bilingual teaser flow that narrows down what to preview.",
+   elements:["Location (country)","Age range","Sect (multi-select)","Salah frequency","Religiosity level","Marital preference (multi-select)","Timeline","Review & submit"],
+   functionality:"Every step can be skipped individually. Answers are stored as an anonymous QuickMatchPreference row, not yet linked to a full profile.",
+   next:"Preview matches"},
+  {n:7, title:"Preview matches", roles:['candidate','wali-proxy'],
+   purpose:"Shows a first set of candidate profiles generated from the wizard's answers — the payoff for the teaser.",
+   elements:["Match cards (blurred/partial detail until registration completes)","\"Continue — build my full profile\" CTA","\"Keep browsing without registering\" option"],
+   functionality:"These are a lightweight preview, not the real MatchCandidate/BlendedScore engine — that only runs once a full profile exists and clears the completion gate.",
+   next:"Full profile — Part 1"},
+]},
+{phase:"Full profile form", screens:[
+  {n:8, title:"Part 1 — About yourself", roles:['candidate','wali-proxy'],
+   purpose:"Core identity, background and family details.",
+   elements:["Name, gender, DOB, marital status, sect, sub-sect, height","Education & occupation history (repeatable)","Languages & hobbies (multi-select)","Native place / current location","Disability yes/no → type multi-select if yes","Guardian / Wali listing — name + relation, marked display-only unless you're the registering Wali yourself"],
+   functionality:"Feeds Profile, MarriageIntention, Education, Occupation, and the display-only Guardian row where applicable.",
+   next:"Part 2 — Desired partner"},
+  {n:9, title:"Part 2 — Desired partner", roles:['candidate','wali-proxy'],
+   purpose:"What the candidate is looking for in a partner.",
+   elements:["Age & height range","Sect / sub-sect / madhhab preference","Marital status accepted, children acceptance","Profession, education, location, living arrangement, timeline"],
+   functionality:"Feeds PartnerPreference. Preferred gender auto-sets to the opposite of the candidate's own gender and is locked.",
+   rule:"Mandatory: age range, preferred sect, living arrangement.",
+   next:"Part 3 — Religious preferences"},
+  {n:10, title:"Part 3 — Religious preferences", roles:['candidate','wali-proxy'],
+   purpose:"The candidate's own religious practice — not her partner's.",
+   elements:["Madhhab, salah frequency, religiosity level","Hijab status (female only) / beard status (male only)","Diet, fasting, zakat, smoking, alcohol","Wedding type preference & lifestyle goals"],
+   functionality:"Gender-conditional fields show or hide automatically based on Profile.Gender.",
+   rule:"Mandatory: smoking, alcohol, salah frequency, and the gender-conditional field.",
+   next:"Part 4 — Photos, video & bio-data"},
+  {n:11, title:"Part 4 — Photos, video & bio-data", roles:['candidate','wali-proxy'],
+   purpose:"The visual and printable side of the profile.",
+   elements:["Up to 4 photo slots, per-photo visibility toggle","Optional short intro video (candidate- or Wali-recorded, max 60s)","Auto-generated bio-data PDF, previewable and downloadable from the profile"],
+   functionality:"Photos and video go to signed-URL-only storage and sit behind a moderation gate before becoming visible to anyone else. The bio-data PDF is compiled from Parts 1–3 and attached to the profile record.",
+   next:"Complete profile review"},
+]},
+{phase:"Review & verification", screens:[
+  {n:12, title:"Complete profile review", roles:['candidate','wali-proxy'],
+   purpose:"One last look at everything before it goes live.",
+   elements:["Full profile preview exactly as a match would see it","Completion-percentage indicator with a checklist of anything missing","Bio-data PDF preview","\"Submit\" CTA"],
+   functionality:"The profile stays invisible in Search/Matching until completion reaches 60% or above.",
+   next:"Selfie verification"},
+  {n:13, title:"Selfie verification (optional)", roles:['candidate','wali-proxy'],
+   purpose:"A quick liveness check to raise the profile's trust score.",
+   elements:["In-app selfie capture","Status indicator (Pending / Approved / Rejected)","\"Skip for now\" option"],
+   functionality:"Optional — skipping doesn't block going live, but an unverified profile is flagged as such to matches. Multiple attempts allowed; TrustScore only updates after a successful review.",
+   next:"Home / dashboard"},
+]},
+{phase:"Home, search & matching", screens:[
+  {n:14, title:"Home / dashboard", roles:['candidate','wali-proxy','wali-display'],
+   purpose:"Landing screen from here on, every time you log in.",
+   elements:["New matches carousel","Pending conversation approvals (Proxy accounts)","Notification bell","Quick links to Search, Messages, Subscription, Settings"],
+   functionality:"A Guardian managing multiple candidates gets a profile switcher here.",
+   next:"Match list, Search, Messaging inbox, or Guardian approval inbox"},
+  {n:15, title:"Match list", roles:['candidate','wali-proxy'],
+   purpose:"Directional, trust-blended candidates generated for this profile.",
+   elements:["Card list — photo, name/age, blended-score, verified badge","\"Express interest\" button"],
+   functionality:"Reads MatchCandidate. A verification-status change updates existing rows rather than requiring regeneration.",
+   next:"Profile detail"},
+  {n:16, title:"Search & filters", roles:['candidate','wali-proxy'],
+   purpose:"Manual search beyond the generated match list.",
+   elements:["Filter chips (age, sect, madhhab, location, marital status, etc.)","Sort control","Paginated results"],
+   functionality:"Only returns profiles meeting the completion gate and each profile's own visibility settings.",
+   next:"Profile detail"},
+  {n:17, title:"Profile detail (match view)", roles:['candidate','wali-proxy'],
+   purpose:"Full view of another candidate's profile.",
+   elements:["Photos / video (respecting their privacy settings)","All profile sections, bio-data PDF download","\"Express interest\" CTA","\"Report\" option"],
+   functionality:"Contact info and HIGH-classified fields (e.g. Guardian contact) are never exposed here — only after an approved contact disclosure.",
+   next:"Conversation request"},
+]},
+{phase:"Guardian gating & messaging", screens:[
+  {n:18, title:"Conversation request", roles:['candidate','wali-proxy'],
+   purpose:"Confirms intent to start a conversation with a specific match.",
+   elements:["Short intro message field","\"Send request\" button","Note that family approval may be required"],
+   functionality:"Creates the Conversation in PendingApproval, plus one ConversationApproval row per side.",
+   next:"Guardian approval inbox for both sides, or straight to messaging if neither side has an active Proxy Guardian"},
+  {n:19, title:"Guardian approval inbox", roles:['wali-proxy'],
+   purpose:"Where a Proxy Wali reviews conversation requests for his candidate(s).",
+   elements:["List of pending requests","Candidate & other-side snippets","Approve / Reject buttons","Notes field"],
+   functionality:"Approving sets Conversation.*ManagedByGuardianId for his side — from then on, messages on that side must come from his account, not the candidate's own login.",
+   rule:"Rejecting blocks the conversation immediately without deleting anything.",
+   next:"Messaging, once both sides are approved"},
+  {n:20, title:"Messaging / chat", roles:['candidate','wali-proxy'],
+   purpose:"Real-time conversation between two approved sides.",
+   elements:["Message thread","Text input","Attachment button","\"Share contact\" action"],
+   functionality:"Delivered via the Realtime Messaging Service (target under 2 seconds). Every push re-checks authorization live — a stale connection can't bypass a mid-conversation revocation.",
+   next:"Contact share screen, when either side is ready to reveal contact info"},
+  {n:21, title:"Contact share / disclosure", roles:['candidate','wali-proxy'],
+   purpose:"The controlled, audited moment contact info is actually revealed.",
+   elements:["\"Share [Guardian's/your] contact\" confirmation","Optional remark field (manual-share fallback)"],
+   functionality:"Writes a ContactDisclosure row: who, why, when.",
+   rule:"If the Guardian's account is genuinely unavailable, the candidate can manually share his contact via one system message — the rest of the conversation otherwise stays blocked. This is a narrow exception, not a way to open free messaging.",
+   next:"Back to messaging"},
+]},
+{phase:"Guardian management", screens:[
+  {n:22, title:"Guardian promotion request", roles:['wali-display','candidate'],
+   purpose:"A display-only Wali requests full (Proxy) control.",
+   elements:["\"Request full control\" button","Explanation of what changes"],
+   functionality:"Reviewed by the candidate herself, no reason required. Approval updates the existing Guardian row in place.",
+   next:"Candidate's review screen, then Home"},
+  {n:23, title:"Guardian swap request", roles:['candidate'],
+   purpose:"The candidate replaces her current Guardian with someone else.",
+   elements:["New Guardian's name / relation / phone","Mandatory reason field"],
+   functionality:"Reviewed by Admin, not the candidate — a bigger, more abuse-prone change. Approval deactivates the old Guardian row (kept as history) and activates a new one.",
+   next:"Admin decision screen"},
+  {n:24, title:"Guardian dashboard", roles:['wali-proxy'],
+   purpose:"Single view for a Wali managing more than one daughter's profile.",
+   elements:["Profile cards per candidate","Pending-approval counts","Quick switch"],
+   functionality:"One UserId can be the active Guardian across multiple Profile rows simultaneously.",
+   next:"Selecting a candidate routes into her Home screen"},
+]},
+{phase:"Account, privacy & billing", screens:[
+  {n:25, title:"Privacy settings", roles:['candidate','wali-proxy'],
+   purpose:"Per-profile visibility control.",
+   elements:["Photo visibility","Contact visibility","Profile visibility toggles"],
+   functionality:"Female profiles load with stricter defaults pre-applied."},
+  {n:26, title:"Notifications", roles:['candidate','wali-proxy','wali-display'],
+   purpose:"Push notification history and preferences.",
+   elements:["Match / message / verification / Guardian-event list","Per-device toggle"],
+   functionality:"Delivered via FCM; tokens tracked per device."},
+  {n:27, title:"Subscription & plans", roles:['candidate','wali-proxy'],
+   purpose:"View or upgrade the current plan.",
+   elements:["Plan cards","Applicable discount badge","\"Women's accounts are free\" notice where relevant"],
+   functionality:"Final price is always computed server-side.",
+   next:"Payment checkout"},
+  {n:28, title:"Payment checkout", roles:['candidate','wali-proxy'],
+   purpose:"Complete a subscription purchase.",
+   elements:["Razorpay checkout (India) or Stripe (international)"],
+   functionality:"Gateway is selected automatically by Profile.Country. Activation is webhook-driven and signature-verified."},
+  {n:29, title:"My profile / edit", roles:['candidate','wali-proxy'],
+   purpose:"Return to any part of the full profile form to update details.",
+   elements:["Section-by-section edit entry points","Completion percentage re-shown","Re-download bio-data PDF"],
+   functionality:"Routes back into the relevant Part 1–4 screen."},
+  {n:30, title:"Report", roles:['candidate','wali-proxy'],
+   purpose:"File a report against a profile or a specific message.",
+   elements:["Reason selector","Free-text detail","Submit"],
+   functionality:"Exactly one of reported profile / reported message is set per report; reviewed by Admin or Moderator."},
+]},
+{phase:"Admin / moderator (web portal)", screens:[
+  {n:31, title:"Admin verification queue", roles:['admin'],
+   purpose:"Review submitted selfie/identity verification requests.",
+   elements:["Queue list","Selfie / document viewer","Approve / Reject","Remarks field"],
+   functionality:"Updates VerificationRequest.Status and TrustScore on approval."},
+  {n:32, title:"Admin guardian-swap decision", roles:['admin'],
+   purpose:"Approve or reject a candidate's Swap request.",
+   elements:["Current vs. proposed Guardian details","Candidate's stated reason","Decision buttons"],
+   functionality:"Approval deactivates the old Guardian row and activates the proposed one."},
+  {n:33, title:"Admin reports review", roles:['admin'],
+   purpose:"Resolve filed reports.",
+   elements:["Report queue","Linked profile/message preview","Resolution notes"],
+   functionality:"Updates Report.Status and Resolution."},
+  {n:34, title:"Admin subscription / plan management", roles:['admin'],
+   purpose:"Manage SubscriptionPlan records and view payment history.",
+   elements:["Plan editor","Transaction log with GatewayTransactionId"],
+   functionality:"Price changes here do not retroactively affect already-active subscriptions."},
+]},
+];
+
+const roleTagLabel = {candidate:"Candidate", 'wali-proxy':"Wali — Proxy", 'wali-display':"Wali — Display-only", admin:"Admin"};
+
+function renderFilterBar(){
+  const bar = document.getElementById('filterBar');
+  ROLES.forEach(r=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (r.key==='all' ? ' active' : '');
+    b.textContent = r.label;
+    b.dataset.role = r.key;
+    b.onclick = ()=>selectRole(r.key);
+    bar.appendChild(b);
+  });
+}
+
+function selectRole(key){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active', c.dataset.role===key));
+  document.querySelectorAll('.card').forEach(card=>{
+    const roles = card.dataset.roles.split(',');
+    card.style.display = (key==='all' || roles.includes(key)) ? '' : 'none';
+  });
+  document.querySelectorAll('section.phase').forEach(sec=>{
+    const visible = sec.querySelectorAll('.card:not([style*="display: none"])').length;
+    const existingNote = sec.querySelector('.empty-note');
+    if(existingNote) existingNote.remove();
+    if(visible===0){
+      const note = document.createElement('div');
+      note.className='empty-note';
+      note.textContent="No screens in this phase apply to this role.";
+      sec.querySelector('.track').appendChild(note);
+    }
+  });
+}
+
+function renderPhases(){
+  const root = document.getElementById('phases');
+  const nav = document.getElementById('sideNav');
+  nav.innerHTML = '<div class="brand">Nikah Platform</div><div class="brand-sub">Screen flow reference</div><ol></ol>';
+  const ol = nav.querySelector('ol');
+
+  DATA.forEach((phaseObj, i)=>{
+    const id = 'phase-'+i;
+    const li = document.createElement('li');
+    li.innerHTML = `<a href="#${id}">${phaseObj.phase}</a>`;
+    ol.appendChild(li);
+
+    const sec = document.createElement('section');
+    sec.className='phase';
+    sec.id=id;
+    sec.innerHTML = `<div class="phase-head"><span class="phase-num">${String(i+1).padStart(2,'0')}</span><h2>${phaseObj.phase}</h2></div><div class="track"></div>`;
+    const track = sec.querySelector('.track');
+
+    phaseObj.screens.forEach(s=>{
+      const card = document.createElement('div');
+      card.className='card';
+      card.dataset.roles = s.roles.join(',');
+      const roleTags = s.roles.map(r=>`<span class="tag ${r}">${roleTagLabel[r]}</span>`).join('');
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-title"><span class="screen-num">${String(s.n).padStart(2,'0')}</span><h3>${s.title}</h3></div>
+          <div class="roles">${roleTags}</div>
+        </div>
+        <p class="purpose">${s.purpose}</p>
+        <div class="grid2">
+          <div class="block"><h4>On screen</h4><ul>${s.elements.map(e=>`<li>${e}</li>`).join('')}</ul></div>
+          <div class="block"><h4>Under the hood</h4><p>${s.functionality}</p></div>
+        </div>
+        ${s.rule ? `<div class="rule">${s.rule}</div>` : ''}
+        ${s.next ? `<div class="next"><b>Next →</b> ${s.next}</div>` : ''}
+      `;
+      track.appendChild(card);
+    });
+    root.appendChild(sec);
+  });
+}
+
+renderFilterBar();
+renderPhases();
+
+const sections = document.querySelectorAll('section.phase');
+const navLinks = document.querySelectorAll('#sideNav a');
+const spy = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const idx = Array.from(sections).indexOf(entry.target);
+      navLinks.forEach((a,i)=>a.classList.toggle('active', i===idx));
+    }
+  });
+}, {rootMargin:'-10% 0px -75% 0px'});
+sections.forEach(s=>spy.observe(s));
+</script>
+</body>
+</html>
